@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <title>Test Autocomplete</title>
+  <style>
+    :root {
+      /* Palette */
+      --ice-cold: #a0d2eb;
+      --freeze-purple: #e5eaf5;
+      --medium-purple: #d0bdf4;
+      --purple-pain: #8458B3;
+      --heavy-purple: #a28089;
+
+      /* Mapped theme tokens */
+      --bg: var(--freeze-purple);
+      --panel: #ffffff;
+      --muted: #6b6d83; /* slightly desaturated purple-gray */
+      --text: #22223b;
+      --border: #dcdff0;
+      --accent: var(--purple-pain);
+      --accent-2: var(--medium-purple);
+      --shadow: 0 6px 16px rgba(0,0,0,.12);
+    }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; padding: 28px; background: var(--bg); color: var(--text); }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; padding: 28px; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .header-row { display:flex; align-items:center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .linklike { background: transparent; border: none; color: var(--muted); cursor: pointer; text-decoration: underline; padding: 4px 6px; border-radius: 6px; }
+    .linklike { background: transparent; border: none; color: var(--muted); cursor: pointer; text-decoration: underline; padding: 4px 6px; border-radius: 6px; }
+    .linklike:hover { color: var(--text); background: rgba(0,0,0,.03); }
+    input[type="text"] { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; background: var(--panel); color: var(--text); outline: none; }
+    input[type="text"]::placeholder { color: #94a3b8; }
+    select { padding: 10px 12px; border-radius: 10px; background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+    button { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); background: #ffffff; color: var(--text); cursor: pointer; }
+    button:hover { background: #f3f4f6; }
+  /* Bootstrap buttons themed with palette */
+  .btn-primary { background-color: var(--purple-pain); border-color: var(--purple-pain); }
+  .btn-primary:hover, .btn-primary:focus { background-color: #734aa1; border-color: #734aa1; }
+  .btn-outline-secondary { color: var(--purple-pain); border-color: var(--medium-purple); }
+  .btn-outline-secondary:hover, .btn-outline-secondary:focus { background-color: var(--medium-purple); color: #fff; border-color: var(--medium-purple); }
+    .panel { position: relative; margin-top: 4px; }
+    .list { position: absolute; top: 0; left: 0; right: 0; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; max-height: 360px; overflow-y: auto; z-index: 1040; }
+    .item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; color: var(--text); }
+    .item + .item { border-top: 1px solid var(--border); }
+    .item:hover, .item.active { background: rgba(132, 88, 179, .08); /* accent tint */ box-shadow: inset 3px 0 0 var(--accent-2); }
+    .item span { flex: 1; min-width: 0; }
+    .item strong { color: var(--purple-pain); }
+    .badge { font-size: 11px; border: 1px solid var(--border); color: var(--muted); padding: 2px 6px; border-radius: 999px; background: #fff; }
+    /* Responsive input grids */
+    .inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .query-grid { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    #results .card { border: 1px solid var(--border); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); }
+    @media (max-width: 720px) {
+      .inputs-grid, .query-grid { grid-template-columns: 1fr; }
+    }
+    .hint { color: var(--muted); font-size: 13px; margin-top: 10px; }
+    #results .card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); }
+
+    /* Modal */
+  /* Custom modal (namespaced to avoid Bootstrap conflicts) */
+  .ai-modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); display: none; align-items: center; justify-content: center; z-index: 1055; }
+  .ai-modal { width: min(880px, 92vw); max-height: min(80vh, 980px); overflow: auto; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
+  .ai-modal header { display:flex; align-items:center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: linear-gradient(180deg, #fff, rgba(255,255,255,.9)); }
+  .ai-modal header h3 { margin: 0; font-size: 16px; color: var(--text); }
+  .ai-modal header .close { border: none; background: transparent; color: var(--muted); font-size: 20px; line-height: 1; padding: 4px 8px; cursor: pointer; }
+  .ai-modal header .close:hover { color: var(--text); background: rgba(0,0,0,.05); border-radius: 8px; }
+  .ai-modal .content { padding: 14px 16px 18px; }
+  .ai-modal .content h4 { margin: 14px 0 6px; font-size: 14px; color: var(--purple-pain); }
+  .ai-modal .content p, .ai-modal .content li { color: #424a60; font-size: 14px; line-height: 1.6; }
+  .ai-modal .content code, .ai-modal .content kbd { background: var(--freeze-purple); border: 1px solid var(--border); padding: 0 6px; border-radius: 6px; }
+
+  /* Results styling */
+  #results { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 900px) { #results { grid-template-columns: 1fr 1fr; } }
+  .result-card { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); box-shadow: var(--shadow); padding: 12px 14px; transition: border-color .2s, transform .06s ease-in-out; }
+  .result-card:hover { border-color: var(--accent-2); transform: translateY(-1px); }
+  .result-content { display: flex; gap: 12px; align-items: flex-start; }
+  .result-img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); background: var(--freeze-purple); flex-shrink: 0; }
+  .result-title { font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
+  .result-meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .result-price { color: var(--purple-pain); font-weight: 600; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header-row">
+      <h2>Test Autocomplete</h2>
+      <button id="howItWorksBtn" class="linklike" title="Xem cách hoạt động">How it works…</button>
+    </div>
+    <div class="row inputs-grid">
+      <input id="apiBase" class="form-control" type="text" placeholder="API base (vd: https://pepeapi-vv2pcyowoa-as.a.run.app)" value="https://pepeapi-vv2pcyowoa-as.a.run.app" />
+      <input id="token" class="form-control" type="text" placeholder="Authorization token (vd: Pepeiscool hoặc Bearer ...)" value="Pepeiscool" />
+    </div>
+  <div style="height: 8px"></div>
+  <div class="hint">Endpoint: <span id="endpointPreview">GET https://pepeapi-vv2pcyowoa-as.a.run.app/api/search/suggest_keywords?query=...</span></div>
+    <div class="row query-grid">
+      <input id="q" class="form-control" type="text" placeholder="Gõ thử: r, roy, royal, thuc... (Enter để tìm)" autocomplete="off" />
+      <select id="limit" class="form-select" title="Số kết quả / trang">
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:8px; gap:16px; flex-wrap: wrap;">
+      <label><input type="checkbox" id="showTypeScore" checked /> Hiện type/score</label>
+      <label><input type="checkbox" id="autoTrackClick" checked /> Gửi suggest_click khi chọn</label>
+      <!--
+      <button id="btnRebuildVectors" title="POST /api/search/rebuild_keyword_vectors">Rebuild vectors</button>
+      <button id="btnRebuildDict" title="POST /api/search/rebuild_dictionary">Rebuild dictionary</button>
+      -->
+      
+      <button id="btnStats1d" class="btn btn-outline-secondary" title="GET /api/search/suggest_stats">Xem stats 24h</button>
+      <button id="btnToggleAdmin" class="btn btn-outline-secondary" title="Hiện/ẩn khu vực Admin">Ẩn Admin</button>
+      <span id="latencyInfo" class="hint"></span>
+    </div>
+    <div class="panel">
+      <div id="list" class="list" style="display:none"></div>
+    </div>
+    
+
+    <div style="height: 20px"></div>
+    <div id="adminSection">
+    <h3 style="display:flex; align-items:center; gap:8px;">Admin: Custom Phrases</h3>
+    <div class="row" style="gap:12px; flex-wrap: wrap; align-items: flex-end;">
+      <div style="flex:1; min-width:220px;">
+        <label style="display:block; font-size:12px; color:#6b7280;">Phrase (ví dụ: thức ăn cho chó)</label>
+        <input id="cp_phrase" type="text" placeholder="Cụm từ chuẩn (không cần viết hoa)" />
+      </div>
+      <div style="flex:1; min-width:180px;">
+        <label style="display:block; font-size:12px; color:#6b7280;">Display (tuỳ chọn)</label>
+        <input id="cp_display" type="text" placeholder="Hiện thị đẹp, nếu để trống sẽ lấy như Phrase" />
+      </div>
+      <div style="width:120px;">
+        <label style="display:block; font-size:12px; color:#6b7280;">Priority</label>
+        <input id="cp_priority" type="number" value="5"  class="form-control"/>
+      </div>
+      <button id="cp_add" class="btn btn-primary">Thêm/Update</button>
+      <button id="cp_cancel" class="btn btn-outline-secondary" style="display:none;">Hủy sửa</button>
+      <button id="cp_refresh" class="btn btn-outline-secondary">Tải danh sách</button>
+      <button id="cp_import" class="btn btn-outline-secondary">Import file (.txt)</button>
+      <input id="cp_file" type="file" accept=".txt" style="display:none;" />
+    </div>
+    <div id="cp_list" style="margin-top:10px; border:1px solid #e5e5e5; border-radius:6px; padding:8px;"></div>
+    </div>
+
+    <div style="height: 16px"></div>
+    <div id="resultsWrap" style="display:none">
+      <div id="resultsHeader" class="row" style="justify-content: space-between;">
+        <div><strong>Kết quả tìm kiếm</strong> <span id="queryEcho" style="color:#6b7280"></span></div>
+        <div class="row">
+          <button id="prevBtn" class="btn btn-outline-secondary">« Trước</button>
+          <div style="min-width: 60px; text-align:center">Trang <span id="pageNum">1</span></div>
+          <button id="nextBtn" class="btn btn-outline-secondary">Sau »</button>
+        </div>
+      </div>
+      <div id="didYouMeanWrap" class="hint" style="display:none; margin-top:6px;"></div>
+  <div id="results" style="margin-top:8px;"></div>
+    </div>
+
+    <!-- Modal: How it works -->
+    <div id="howModal" class="ai-modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="ai-modal" role="document">
+        <header>
+          <h3>Cách nó hoạt động — Suggest Keywords</h3>
+          <button class="close" id="howClose" aria-label="Đóng">×</button>
+        </header>
+        <div class="content">
+          <p>Trang này kết nối tới API <code>GET /api/search/suggest_keywords</code> để gợi ý từ khóa theo thời gian thực. Hệ thống trộn kết quả từ nhiều nguồn và xếp hạng thông minh để hiển thị danh sách bạn thấy bên dưới ô tìm kiếm.</p>
+          <h4>Nguồn gợi ý chính</h4>
+          <ul>
+            <li><strong>Prefix</strong>: Hoàn tất token đang gõ theo tiền tố.</li>
+            <li><strong>Neighbor (PPMI)</strong>: Từ/cụm từ có quan hệ thống kê cao với token trước đó.</li>
+            <li><strong>Next token</strong>: Dự đoán từ tiếp theo theo ngữ cảnh 1–2 bước.</li>
+            <li><strong>Phrase</strong>: Mở rộng thành cụm nhiều token dựa trên chuỗi next-token.</li>
+            <li><strong>Phrase dictionary</strong>: Cụm mined sẵn (n-gram) vượt ngưỡng PMI.</li>
+            <li><strong>Custom</strong>: Cụm do Admin quản trị (ưu tiên cao).</li>
+            <li><strong>Embedding</strong> (tuỳ chọn): Hàng xóm nghĩa dựa trên embedding.</li>
+          </ul>
+          <h4>Hiệu năng & Cache</h4>
+          <p>Truy vấn được chuẩn hoá, chạy song song các nhánh chính và cache trong Redis ~20s theo <code>query</code> + cờ có/không khoảng trắng ở cuối. Header <code>x-suggest-latency-ms</code> hiển thị độ trễ xử lý.</p>
+          <h4>Học online</h4>
+          <p>Nếu bật, hệ thống thu thập <em>click</em> trên gợi ý và truy vấn tìm kiếm để cải thiện gợi ý theo thời gian.</p>
+          <h4>Admin: Custom Phrases</h4>
+          <p>Bạn có thể thêm/sửa/xoá cụm ưu tiên ở khu vực Admin (nút “Hiện Admin”). Cụm này có thể được <em>pin</em> ở đầu danh sách.</p>
+          <h4>Auth</h4>
+          <p>Các API yêu cầu header <code>Authorization: Bearer &lt;token&gt;</code>. Ô token bên trên chấp nhận cả dạng thuần lẫn tiền tố <code>Bearer</code> và sẽ tự chuẩn hoá khi gửi.</p>
+          <h4>Tham khảo</h4>
+          <p>Nội dung chi tiết hơn nằm trong README đính kèm. Phần tóm tắt ở đây được cô đọng cho mục đích dùng nhanh.</p>
+          <hr class="my-3"/>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="README-suggest.md" class="btn btn-sm btn-outline-primary" download>Download README (.md)</a>
+            <a href="README-suggest.md" class="btn btn-sm btn-link" target="_blank" rel="noopener">Xem README (mở tab mới)</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const apiBase = $('#apiBase');
+    const token = $('#token');
+    const q = $('#q');
+  const list = $('#list');
+  const limitSel = $('#limit');
+  const resultsWrap = $('#resultsWrap');
+  const results = $('#results');
+  const pageNum = $('#pageNum');
+  const prevBtn = $('#prevBtn');
+  const nextBtn = $('#nextBtn');
+  const queryEcho = $('#queryEcho');
+  const didYouMeanWrap = $('#didYouMeanWrap');
+  const endpointPreview = document.getElementById('endpointPreview');
+  const showTypeScore = document.getElementById('showTypeScore');
+  const autoTrackClick = document.getElementById('autoTrackClick');
+  const btnRebuildVectors = document.getElementById('btnRebuildVectors');
+  const btnRebuildDict = document.getElementById('btnRebuildDict');
+  const btnStats1d = document.getElementById('btnStats1d');
+  const latencyInfo = document.getElementById('latencyInfo');
+  const cp_phrase = document.getElementById('cp_phrase');
+  const cp_display = document.getElementById('cp_display');
+  const cp_priority = document.getElementById('cp_priority');
+  const cp_add = document.getElementById('cp_add');
+  const cp_cancel = document.getElementById('cp_cancel');
+  const cp_refresh = document.getElementById('cp_refresh');
+  const cp_list = document.getElementById('cp_list');
+  const cp_import = document.getElementById('cp_import');
+  const cp_file = document.getElementById('cp_file');
+  const adminSection = document.getElementById('adminSection');
+  const btnToggleAdmin = document.getElementById('btnToggleAdmin');
+  const howItWorksBtn = document.getElementById('howItWorksBtn');
+  const howModal = document.getElementById('howModal');
+  const howClose = document.getElementById('howClose');
+
+    let timer;
+    let activeIndex = -1;
+  let currentPage = 1;
+
+      // Modal handlers
+      function openHowModal() {
+        howModal.style.display = 'flex';
+        howModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeHowModal() {
+        howModal.style.display = 'none';
+        howModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+      howItWorksBtn?.addEventListener('click', openHowModal);
+      howClose?.addEventListener('click', closeHowModal);
+      howModal?.addEventListener('click', (e) => { if (e.target === howModal) closeHowModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeHowModal(); });
+
+    function setList(items) {
+      list.innerHTML = '';
+      if (!items || items.length === 0) {
+        list.style.display = 'none';
+        return;
+      }
+      items.forEach((it, idx) => {
+        const div = document.createElement('div');
+        div.className = 'item' + (idx === activeIndex ? ' active' : '');
+        // Hiện type/score khi bật checkbox
+        const badge = showTypeScore.checked ? `<span class="badge">${escapeHtml(it.type || '')}${typeof it.score !== 'undefined' ? `:${String(it.score)}` : ''}</span>` : '';
+        div.innerHTML = `${badge}<span>${renderHighlight(it)}</span>`;
+        div.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          const beforeQ = q.value;
+          q.value = it.full || it.text;
+          if (autoTrackClick.checked) {
+            trackSuggestClick(beforeQ, it).catch(err => console.warn('track click error', err));
+          }
+          list.style.display = 'none';
+          console.log('Selected:', it);
+        });
+        list.appendChild(div);
+      });
+      list.style.display = 'block';
+      // keep active item visible when navigating with arrows
+      if (activeIndex >= 0 && list.children[activeIndex]) {
+        list.children[activeIndex].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
+    }
+
+    let lastSuggestLatency = null;
+    async function fetchSuggest(v) {
+      const base = apiBase.value.replace(/\/$/, '');
+      const url = `${base}/api/search/suggest_keywords?query=${encodeURIComponent(v)}`;
+      const headers = {};
+      const tk = token.value.trim();
+        if (tk) {
+          // Luôn gửi dạng Bearer <token> để backend parse đúng
+          headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+      }
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      lastSuggestLatency = res.headers.get('x-suggest-latency-ms');
+      latencyInfo.textContent = lastSuggestLatency ? `Latency: ${lastSuggestLatency} ms` : '';
+      const json = await res.json();
+      return json?.data || [];
+    }
+
+    function onInput() {
+      clearTimeout(timer);
+      const v = q.value; // không trim để giữ khoảng trắng cuối
+      if (!v || !v.replace(/\s+/g, '')) { setList([]); return; }
+      timer = setTimeout(async () => {
+        try {
+          const items = await fetchSuggest(v); // gửi nguyên văn để API biết có space cuối
+          activeIndex = items.length ? 0 : -1;
+          setList(items);
+        } catch (e) {
+          console.error('Suggest error', e);
+          setList([]);
+        }
+      }, 120);
+      updateEndpoint();
+    }
+
+    q.addEventListener('input', onInput);
+    q.addEventListener('focus', onInput);
+    q.addEventListener('blur', () => setTimeout(() => list.style.display = 'none', 150));
+  apiBase.addEventListener('input', () => updateEndpoint());
+
+    q.addEventListener('keydown', (e) => {
+      const items = Array.from(list.children);
+      // If no suggestion items, allow default behavior (including Tab navigation)
+      if (!items.length) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIndex = (activeIndex + 1) % items.length;
+        // chỉ cập nhật active class, không render lại từ DOM để giữ highlight
+        setList(currentItemsCache);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIndex = (activeIndex - 1 + items.length) % items.length;
+        setList(currentItemsCache);
+      } else if (e.key === 'Tab') {
+        // Apply the first suggestion on Tab
+        if (currentItemsCache && currentItemsCache.length > 0) {
+          e.preventDefault();
+          const chosen = currentItemsCache[0];
+          const beforeQ = q.value;
+          q.value = chosen.full || chosen.text || q.value;
+          if (autoTrackClick.checked) {
+            trackSuggestClick(beforeQ, chosen).catch(err => console.warn('track click error', err));
+          }
+          list.style.display = 'none';
+          updateEndpoint();
+        }
+      }
+    });
+
+    // Global keydown for Enter to trigger search
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        // Nếu đang có danh sách gợi ý và có item active, nhận item đó vào input trước
+        const items = Array.from(list.children);
+        if (items.length && activeIndex >= 0 && activeIndex < items.length && currentItemsCache[activeIndex]) {
+          const chosen = currentItemsCache[activeIndex];
+          q.value = chosen.full || chosen.text;
+        }
+        list.style.display = 'none';
+        // Thực thi search trang 1
+        doSearch(1);
+      }
+    });
+
+    // Cache last items to keep highlight rendering stable across key navigation
+    let currentItemsCache = [];
+    const normalize = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[.,/#!$%^&*;:{}=\-_`~()\[\]'"+|<>?]/g, ' ').replace(/\s+/g, ' ').trim();
+    function renderHighlight(it) {
+      // Hiển thị cả cụm gợi ý hoàn chỉnh (full), bôi đậm phần được tự động hoàn tất
+      const current = q.value || '';
+      const full = String(it.full || it.text || '');
+      if (!current) return escapeHtml(full);
+      // Nếu full bắt đầu bằng current -> bold phần còn lại
+      if (full.toLowerCase().startsWith(current.toLowerCase())) {
+        const head = escapeHtml(full.substring(0, current.length));
+        const tail = escapeHtml(full.substring(current.length));
+        return `${head}<strong>${tail}</strong>`;
+      }
+      // fallback: không chắc chắn, hiển thị bình thường
+      return escapeHtml(full);
+    }
+
+    // Override setList to keep cache in sync
+    const _setList = setList;
+    setList = function(items) {
+      currentItemsCache = items;
+      _setList(items);
+    }
+
+    function updateEndpoint() {
+      const base = (apiBase.value || '').replace(/\/$/, '') || 'https://pepeapi-vv2pcyowoa-as.a.run.app';
+      const v = q.value || '';
+      const qs = `?query=${encodeURIComponent(v)}`;
+      endpointPreview.textContent = `GET ${base}/api/search/suggest_keywords${qs}`;
+    }
+
+    // Initialize endpoint preview once
+    updateEndpoint();
+
+    // Admin toggle: persist to localStorage
+    const ADMIN_TOGGLE_KEY = 'showAdmin@autocomplete';
+    function applyAdminVisibility(show) {
+      adminSection.style.display = show ? 'block' : 'none';
+      btnToggleAdmin.textContent = show ? 'Ẩn Admin' : 'Hiện Admin';
+    }
+    const savedShowAdmin = localStorage.getItem(ADMIN_TOGGLE_KEY);
+    let showAdmin = savedShowAdmin === null ? false : savedShowAdmin === '1';
+    applyAdminVisibility(showAdmin);
+    if (showAdmin) {
+      // preload list when visible
+      loadCustomPhrases().catch(()=>{});
+    }
+    btnToggleAdmin?.addEventListener('click', () => {
+      showAdmin = !showAdmin;
+      applyAdminVisibility(showAdmin);
+      localStorage.setItem(ADMIN_TOGGLE_KEY, showAdmin ? '1' : '0');
+      if (showAdmin) {
+        loadCustomPhrases().catch(()=>{});
+      }
+    });
+
+    // Helpers
+    async function trackSuggestClick(qBefore, item) {
+      const base = apiBase.value.replace(/\/$/, '');
+      const url = `${base}/api/search/suggest_click`;
+      const headers = { 'Content-Type': 'application/json' };
+      const tk = token.value.trim();
+      if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+      const body = {
+        q: String(qBefore || ''),
+        chosen: String(item?.full || item?.text || ''),
+        token: String(item?.token || ''),
+        type: String(item?.type || ''),
+      };
+      const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error('track click HTTP ' + res.status);
+      return await res.json();
+    }
+
+    async function postNoBody(path) {
+      const base = apiBase.value.replace(/\/$/, '');
+      const url = `${base}${path}`;
+      const headers = {};
+      const tk = token.value.trim();
+    if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+      const t0 = performance.now();
+      const res = await fetch(url, { method: 'POST', headers });
+      const dt = Math.round(performance.now() - t0);
+      if (!res.ok) throw new Error(path + ' HTTP ' + res.status);
+      const json = await res.json();
+      alert(`${path} OK (${dt}ms)\n` + JSON.stringify(json?.data || json, null, 2));
+    }
+
+    btnRebuildVectors?.addEventListener('click', () => postNoBody('/api/search/rebuild_keyword_vectors').catch(e => alert(e)));
+    btnRebuildDict?.addEventListener('click', () => postNoBody('/api/search/rebuild_dictionary').catch(e => alert(e)));
+
+    btnStats1d?.addEventListener('click', async () => {
+      try {
+        const base = apiBase.value.replace(/\/$/, '');
+        const url = new URL(`${base}/api/search/suggest_stats`);
+        const now = new Date();
+        const from = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+        const to = now.toISOString();
+        url.searchParams.set('from', from);
+        url.searchParams.set('to', to);
+        const headers = {};
+        const tk = token.value.trim();
+        if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+        const res = await fetch(url.toString(), { headers });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        alert('Suggest stats 24h:\n' + JSON.stringify(json?.data || json, null, 2));
+      } catch (e) {
+        alert(String(e));
+      }
+    });
+
+    // Admin: custom phrases
+    let editingId = null; // track the item being edited
+
+    async function loadCustomPhrases() {
+      const base = apiBase.value.replace(/\/$/, '');
+      const url = `${base}/api/search/custom_phrases`;
+      const headers = {};
+      const tk = token.value.trim();
+      if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      const rows = json?.data || [];
+      cp_list.innerHTML = '';
+      rows.forEach((r) => {
+        const rid = r?._id || r?.id || r?._doc?._id || r?.pk || '';
+        const div = document.createElement('div');
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.alignItems = 'center';
+        div.style.padding = '6px 8px';
+        div.style.borderBottom = '1px solid #eee';
+  const title = document.createElement('div');
+  const idText = escapeHtml(String(rid || ''));
+  title.innerHTML = `<strong>${escapeHtml(r.display || r.phrase)}</strong><br/><span class="hint">${escapeHtml((r.tokens || []).join(' '))} • priority ${r.priority} • id ${idText}</span>`;
+        const actions = document.createElement('div');
+        actions.style.display = 'flex';
+        actions.style.gap = '8px';
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Sửa';
+        editBtn.addEventListener('click', () => {
+          editingId = rid;
+          cp_phrase.value = r.phrase || '';
+          cp_display.value = r.display || '';
+          cp_priority.value = (r.priority ?? 1);
+          cp_add.textContent = 'Lưu (Update)';
+          cp_cancel.style.display = 'inline-block';
+          // ensure admin visible when editing
+          if (!showAdmin) {
+            btnToggleAdmin.click();
+          }
+        });
+        const del = document.createElement('button');
+        del.textContent = 'Xoá';
+        del.addEventListener('click', async () => {
+          if (!rid) return alert('Không tìm thấy id để xoá');
+          if (!confirm('Xoá mục này?')) return;
+          try {
+            const ok = await deleteCustomPhrase(rid);
+            if (!ok) return; // deleteCustomPhrase already alerted error
+            await loadCustomPhrases();
+          } catch(e) {
+            alert(String(e));
+          }
+        });
+        actions.appendChild(editBtn);
+        actions.appendChild(del);
+        div.appendChild(title);
+        div.appendChild(actions);
+        cp_list.appendChild(div);
+      });
+      if (!rows.length) cp_list.innerHTML = '<div class="hint">Chưa có phrase nào.</div>';
+    }
+
+    cp_refresh?.addEventListener('click', () => loadCustomPhrases().catch(e => alert(String(e))));
+    cp_cancel?.addEventListener('click', () => {
+      editingId = null;
+      cp_add.textContent = 'Thêm/Update';
+      cp_cancel.style.display = 'none';
+      cp_phrase.value = '';
+      cp_display.value = '';
+    });
+
+    cp_add?.addEventListener('click', async () => {
+      try {
+        const base = apiBase.value.replace(/\/$/, '');
+        let url = `${base}/api/search/custom_phrases`;
+        const headers = { 'Content-Type': 'application/json' };
+        const tk = token.value.trim();
+      if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+        const payload = {
+          phrase: String(cp_phrase.value || ''),
+          display: String(cp_display.value || ''),
+          priority: parseFloat(cp_priority.value) || 1,
+        };
+        if (!payload.phrase.trim()) return alert('Nhập Phrase');
+        if (editingId) {
+          // Update only with PUT (avoid POST fallback to prevent accidental new doc)
+          // 1) PUT /custom_phrases with body.id
+          let res = await fetch(url, { method: 'PUT', headers, body: JSON.stringify({ id: editingId, ...payload }) });
+          // 2) Fallback: PUT /custom_phrases/:id
+          if (!res.ok) {
+            res = await fetch(`${url}/${encodeURIComponent(editingId)}`, { method: 'PUT', headers, body: JSON.stringify(payload) });
+          }
+          // 3) Fallback: PUT /custom_phrases?id=...
+          if (!res.ok) {
+            res = await fetch(`${url}?id=${encodeURIComponent(editingId)}`, { method: 'PUT', headers, body: JSON.stringify(payload) });
+          }
+          if (!res.ok) {
+            const text = await res.text().catch(()=>'');
+            throw new Error('Update thất bại: ' + res.status + (text? `\n${text}`:''));
+          }
+          alert('Đã cập nhật');
+        } else {
+          const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          alert('Đã thêm');
+        }
+        // reset form
+        editingId = null;
+        cp_add.textContent = 'Thêm/Update';
+        cp_cancel.style.display = 'none';
+        cp_phrase.value = '';
+        cp_display.value = '';
+        loadCustomPhrases().catch(e => alert(String(e)));
+      } catch (e) {
+        alert(String(e));
+      }
+    });
+
+    // Import file (.txt) — mỗi dòng là 1 phrase
+    cp_import?.addEventListener('click', () => cp_file?.click());
+    cp_file?.addEventListener('change', async (ev) => {
+      const file = ev.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+        if (!lines.length) return alert('File rỗng hoặc không có dòng hợp lệ');
+        const unique = Array.from(new Set(lines));
+        if (!confirm(`Import ${unique.length} dòng?`)) return;
+        const base = apiBase.value.replace(/\/$/, '');
+        const url = `${base}/api/search/custom_phrases`;
+        const headers = { 'Content-Type': 'application/json' };
+        const tk = token.value.trim();
+        if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+        const prio = parseFloat(cp_priority.value) || 1;
+        let okCount = 0, failCount = 0;
+        const t0 = performance.now();
+        // send in small batches to avoid overload
+        const chunkSize = 10;
+        for (let i = 0; i < unique.length; i += chunkSize) {
+          const chunk = unique.slice(i, i + chunkSize);
+          await Promise.all(chunk.map(async phrase => {
+            const payload = { phrase, display: '', priority: prio };
+            const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
+            if (res.ok) okCount++; else failCount++;
+          }));
+        }
+        const dt = Math.round(performance.now() - t0);
+        alert(`Import xong: ${okCount} OK, ${failCount} lỗi (${dt}ms)`);
+        await loadCustomPhrases();
+      } catch (e) {
+        alert('Import lỗi: ' + String(e));
+      } finally {
+        ev.target.value = '';
+      }
+    });
+
+    // Search and pagination
+    async function fetchSearch(query, page, limit) {
+      const base = apiBase.value.replace(/\/$/, '');
+      const params = new URLSearchParams({
+        query: query,
+        sort: 'related_score desc',
+        limit: String(limit),
+        page: String(page),
+      });
+      const url = `${base}/api/search?${params.toString()}`;
+      const headers = {};
+      const tk = token.value.trim();
+    if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      return json?.data || [];
+    }
+
+    async function doSearch(page = 1) {
+      const query = (q.value || '').trim();
+      if (!query) return;
+      const limit = parseInt(limitSel.value, 10) || 10;
+      try {
+        const [rows, didYouMean] = await Promise.all([
+          fetchSearch(query, page, limit),
+          fetchTypoSuggest(query)
+        ]);
+        currentPage = page;
+        pageNum.textContent = String(currentPage);
+        queryEcho.textContent = `cho \u201C${query}\u201D`;
+        renderResults(rows);
+        resultsWrap.style.display = 'block';
+        // Điều kiện phân trang: nếu ít hơn limit thì ẩn nút Sau
+        nextBtn.disabled = rows.length < limit;
+        prevBtn.disabled = currentPage <= 1;
+
+        // Render Did you mean
+        if (didYouMean && didYouMean.toLowerCase() !== query.toLowerCase()) {
+          didYouMeanWrap.style.display = 'block';
+          didYouMeanWrap.innerHTML = `Gợi ý: Có phải bạn muốn tìm “<a id="dymLink" href="#">${escapeHtml(didYouMean)}</a>”?`;
+          const link = document.getElementById('dymLink');
+          link?.addEventListener('click', (e) => {
+            e.preventDefault();
+            q.value = didYouMean;
+            doSearch(1);
+          });
+        } else {
+          didYouMeanWrap.style.display = 'none';
+          didYouMeanWrap.innerHTML = '';
+        }
+      } catch (err) {
+        console.error('Search error', err);
+      }
+    }
+
+    function renderResults(rows) {
+      results.innerHTML = '';
+      rows.forEach((p) => {
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        const title = escapeHtml(p.title || p.name || '');
+        const brand = escapeHtml(p.brand?.text || p.brand || '');
+        const price = p.selling_price ?? p.price_promotion ?? p.price;
+        const img = p.images || p.units?.[0]?.main_image;
+        card.innerHTML = `
+          <div class="result-content">
+            ${img ? `<img class="result-img" src="${img}" alt="${title}" />` : ''}
+            <div class="result-main" style="flex:1; min-width:0;">
+              <div class="result-title">${title}</div>
+              <div class="result-meta">${brand}</div>
+              <div class="result-price">${price ? price.toLocaleString('vi-VN') + ' đ' : ''}</div>
+            </div>
+          </div>
+        `;
+        results.appendChild(card);
+      });
+    }
+
+    prevBtn?.addEventListener('click', () => {
+      if (currentPage > 1) doSearch(currentPage - 1);
+    });
+    nextBtn?.addEventListener('click', () => {
+      doSearch(currentPage + 1);
+    });
+
+    async function fetchTypoSuggest(query) {
+      const base = apiBase.value.replace(/\/$/, '');
+      const url = `${base}/api/search/typo_suggest?query=${encodeURIComponent(query)}`;
+      const headers = {};
+      const tk = token.value.trim();
+    if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+      try {
+        const res = await fetch(url, { headers });
+        if (!res.ok) return null;
+        const json = await res.json();
+        // API trả về { data: { did_you_mean, tokens, correctedTokens } }
+        return json?.data?.did_you_mean || null;
+      } catch {
+        return null;
+      }
+    }
+
+    // Delete with fallbacks and detailed error (try JSON body first for robust backend handling)
+    async function deleteCustomPhrase(id) {
+      const base = apiBase.value.replace(/\/$/, '');
+      const headers = { };
+      const tk = token.value.trim();
+      if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+
+      const errors = [];
+      // Try DELETE with body first
+      const headersJson = { ...headers, 'Content-Type': 'application/json' };
+      let res = await fetch(`${base}/api/search/custom_phrases`, { method: 'DELETE', headers: headersJson, body: JSON.stringify({ id }) });
+      if (res.ok) return true; else errors.push(`body{id} -> ${res.status}` + ' ' + await res.text().catch(()=>''));
+      // Then query param
+      res = await fetch(`${base}/api/search/custom_phrases?id=${encodeURIComponent(id)}`, { method: 'DELETE', headers });
+      if (res.ok) return true; else errors.push(`?id -> ${res.status}` + ' ' + await res.text().catch(()=>''));
+      // Try DELETE with path param
+      res = await fetch(`${base}/api/search/custom_phrases/${encodeURIComponent(id)}`, { method: 'DELETE', headers });
+      if (res.ok) return true; else errors.push(`/:id -> ${res.status}` + ' ' + await res.text().catch(()=>''));
+      alert('Xoá thất bại. ID: ' + id + '\n' + errors.join('\n---\n'));
+      return false;
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
