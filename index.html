@@ -41,8 +41,8 @@
   .btn-primary:hover, .btn-primary:focus { background-color: #734aa1; border-color: #734aa1; }
   .btn-outline-secondary { color: var(--purple-pain); border-color: var(--medium-purple); }
   .btn-outline-secondary:hover, .btn-outline-secondary:focus { background-color: var(--medium-purple); color: #fff; border-color: var(--medium-purple); }
-    .panel { position: relative; margin-top: 4px; }
-    .list { position: absolute; top: 0; left: 0; right: 0; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; max-height: 360px; overflow-y: auto; z-index: 1040; }
+  .q-wrap { position: relative; }
+  .list { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; max-height: 360px; overflow-y: auto; z-index: 1040; }
     .item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; color: var(--text); }
     .item + .item { border-top: 1px solid var(--border); }
     .item:hover, .item.active { background: rgba(132, 88, 179, .08); /* accent tint */ box-shadow: inset 3px 0 0 var(--accent-2); }
@@ -97,7 +97,10 @@
   <div style="height: 8px"></div>
   <div class="hint">Endpoint: <span id="endpointPreview">GET https://pepeapi-vv2pcyowoa-as.a.run.app/api/search/suggest_keywords?query=...</span></div>
     <div class="row query-grid">
-      <input id="q" class="form-control" type="text" placeholder="Gõ thử: r, roy, royal, thuc... (Enter để tìm)" autocomplete="off" />
+      <div class="q-wrap">
+        <input id="q" class="form-control" type="text" placeholder="Gõ thử: r, roy, royal, thuc... (Enter để tìm)" autocomplete="off" />
+        <div class="list" id="list" style="display:none"></div>
+      </div>
       <select id="limit" class="form-select" title="Số kết quả / trang">
         <option value="10" selected>10</option>
         <option value="20">20</option>
@@ -105,7 +108,7 @@
       </select>
     </div>
     <div class="row" style="margin-top:8px; gap:16px; flex-wrap: wrap;">
-      <label><input type="checkbox" id="showTypeScore" checked /> Hiện type/score</label>
+  <label><input type="checkbox" id="showTypeScore" /> Hiện type/score</label>
       <label><input type="checkbox" id="autoTrackClick" checked /> Gửi suggest_click khi chọn</label>
       <!--
       <button id="btnRebuildVectors" title="POST /api/search/rebuild_keyword_vectors">Rebuild vectors</button>
@@ -116,9 +119,7 @@
       <button id="btnToggleAdmin" class="btn btn-outline-secondary" title="Hiện/ẩn khu vực Admin">Ẩn Admin</button>
       <span id="latencyInfo" class="hint"></span>
     </div>
-    <div class="panel">
-      <div id="list" class="list" style="display:none"></div>
-    </div>
+    
     
 
     <div style="height: 20px"></div>
