@@ -26,8 +26,121 @@
     }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; padding: 28px; background: var(--bg); color: var(--text); }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; padding: 28px; background: var(--bg); color: var(--text); }
-    <title>Test Autocomplete</title>
-    <link rel="stylesheet" href="css/styles.css" />
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .header-row { display:flex; align-items:center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .linklike { background: transparent; border: none; color: var(--muted); cursor: pointer; text-decoration: underline; padding: 4px 6px; border-radius: 6px; }
+    .linklike { background: transparent; border: none; color: var(--muted); cursor: pointer; text-decoration: underline; padding: 4px 6px; border-radius: 6px; }
+    .linklike:hover { color: var(--text); background: rgba(0,0,0,.03); }
+    input[type="text"] { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; background: var(--panel); color: var(--text); outline: none; }
+    input[type="text"]::placeholder { color: #94a3b8; }
+    select { padding: 10px 12px; border-radius: 10px; background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+    button { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); background: #ffffff; color: var(--text); cursor: pointer; }
+    button:hover { background: #f3f4f6; }
+  /* Bootstrap buttons themed with palette */
+  .btn-primary { background-color: var(--purple-pain); border-color: var(--purple-pain); }
+  .btn-primary:hover, .btn-primary:focus { background-color: #734aa1; border-color: #734aa1; }
+  .btn-outline-secondary { color: var(--purple-pain); border-color: var(--medium-purple); }
+  .btn-outline-secondary:hover, .btn-outline-secondary:focus { background-color: var(--medium-purple); color: #fff; border-color: var(--medium-purple); }
+  .q-wrap { position: relative; }
+  .list { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; max-height: 360px; overflow-y: auto; z-index: 1040; }
+    .item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; color: var(--text); }
+    .item + .item { border-top: 1px solid var(--border); }
+    .item:hover, .item.active { background: rgba(132, 88, 179, .08); /* accent tint */ box-shadow: inset 3px 0 0 var(--accent-2); }
+    .item span { flex: 1; min-width: 0; }
+    .item strong { color: var(--purple-pain); }
+    .badge { font-size: 11px; border: 1px solid var(--border); color: var(--muted); padding: 2px 6px; border-radius: 999px; background: #fff; }
+    /* Responsive input grids */
+    .inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .query-grid { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    #results .card { border: 1px solid var(--border); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); }
+    @media (max-width: 720px) {
+      .inputs-grid, .query-grid { grid-template-columns: 1fr; }
+    }
+    .hint { color: var(--muted); font-size: 13px; margin-top: 10px; }
+    #results .card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); }
+
+    /* Modal */
+  /* Custom modal (namespaced to avoid Bootstrap conflicts) */
+  .ai-modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); display: none; align-items: center; justify-content: center; z-index: 1055; }
+  .ai-modal { width: min(880px, 92vw); max-height: min(80vh, 980px); overflow: auto; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
+  .ai-modal header { display:flex; align-items:center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: linear-gradient(180deg, #fff, rgba(255,255,255,.9)); }
+  .ai-modal header h3 { margin: 0; font-size: 16px; color: var(--text); }
+  .ai-modal header .close { border: none; background: transparent; color: var(--muted); font-size: 20px; line-height: 1; padding: 4px 8px; cursor: pointer; }
+  .ai-modal header .close:hover { color: var(--text); background: rgba(0,0,0,.05); border-radius: 8px; }
+  .ai-modal .content { padding: 14px 16px 18px; }
+  .ai-modal .content h4 { margin: 14px 0 6px; font-size: 14px; color: var(--purple-pain); }
+  .ai-modal .content p, .ai-modal .content li { color: #424a60; font-size: 14px; line-height: 1.6; }
+  .ai-modal .content code, .ai-modal .content kbd { background: var(--freeze-purple); border: 1px solid var(--border); padding: 0 6px; border-radius: 6px; }
+
+  /* Results styling */
+  #results { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 900px) { #results { grid-template-columns: 1fr 1fr; } }
+  .result-card { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); box-shadow: var(--shadow); padding: 12px 14px; transition: border-color .2s, transform .06s ease-in-out; }
+  .result-card:hover { border-color: var(--accent-2); transform: translateY(-1px); }
+  .result-content { display: flex; gap: 12px; align-items: flex-start; }
+  .result-img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); background: var(--freeze-purple); flex-shrink: 0; }
+  .result-title { font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
+  .result-meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .result-price { color: var(--purple-pain); font-weight: 600; margin-top: 6px; }
+  /* Autocomplete highlight styles */
+  .suggest-frag { font-weight: 400; }
+  .suggest-hit { font-weight: 700; }
+
+    /* Two-column layout */
+    .layout { display:flex; gap:26px; align-items:flex-start; }
+    /* Make main column a bit narrower to give admin more space */
+    .main-col { flex: 0 1 58%; min-width:0; }
+    .admin-col { flex: 0 0 42%; max-width:520px; background: var(--panel); border:1px solid var(--border); padding:16px 18px 20px; border-radius:14px; box-shadow: var(--shadow); position:sticky; top:16px; transition: background .25s, color .25s; }
+    /* Scrollable phrase list container */
+    .admin-col #cp_list { max-height: 380px; overflow:auto; scrollbar-width: thin; }
+    .admin-col #cp_list::-webkit-scrollbar { width:8px; }
+    .admin-col #cp_list::-webkit-scrollbar-thumb { background: #c9c9d4; border-radius:5px; }
+    .admin-col #cp_list::-webkit-scrollbar-track { background: transparent; }
+    /* Collapsed state for mobile (will be toggled via class) */
+    .admin-col.collapsed { display:none; }
+    .admin-col h3 { margin-top:0; }
+    @media (max-width: 1000px) {
+      .layout { flex-direction: column; }
+      .main-col { flex:1 1 auto; }
+      .admin-col { flex:1 1 auto; width:auto; position:static; }
+    }
+    /* Dark mode base (will toggle a body class) */
+    body.dark {
+      --bg: #1f2330;
+      --panel: #272c3a;
+      --text: #e6e9f2;
+      --border: #384154;
+      --muted: #9aa3b5;
+      --accent: #b18cff;
+      --accent-2: #8e76d9;
+      color: var(--text);
+      background: var(--bg);
+    }
+    body.dark .result-card { background: var(--panel); }
+    body.dark .admin-col { background: var(--panel); }
+    body.dark input, body.dark select, body.dark button { background: #2f3544; color: var(--text); border-color: var(--border); }
+    body.dark .list { background: var(--panel); }
+    body.dark .item.active { background: rgba(177,140,255,.15); }
+    body.dark .hint { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header-row">
+      <h2>Test Autocomplete</h2>
+      <button id="howItWorksBtn" class="linklike" title="Xem cách hoạt động">How it works…</button>
+    </div>
+    <div class="layout">
+      <div class="main-col">
+        <div class="row inputs-grid">
+          <input id="apiBase" class="form-control" type="text" placeholder="API base (vd: https://pepeapi-vv2pcyowoa-as.a.run.app)" value="https://pepeapi-vv2pcyowoa-as.a.run.app" />
+          <input id="token" class="form-control" type="text" placeholder="Authorization token (vd: Pepeiscool hoặc Bearer ...)" value="Pepeiscool" />
+        </div>
+        <div style="height: 8px"></div>
+        <div class="hint">Endpoint: <span id="endpointPreview">GET https://pepeapi-vv2pcyowoa-as.a.run.app/api/search/suggest_keywords?query=...</span></div>
+        <div class="row query-grid" style="margin-top:6px;">
+          <div class="q-wrap">
+            <input id="q" class="form-control" type="text" placeholder="Gõ thử: r, roy, royal, thuc... (Enter để tìm)" autocomplete="off" />
             <div class="list" id="list" style="display:none"></div>
           </div>
           <select id="limit" class="form-select" title="Số kết quả / trang">
@@ -1078,5 +1191,7 @@
       alert('Xoá thất bại. ID: ' + id + '\n' + errors.join('\n---\n'));
       return false;
     }
-  <script src="js/app.js" defer></script>
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
 </html>
