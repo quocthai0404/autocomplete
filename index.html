@@ -26,139 +26,86 @@
     }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; padding: 28px; background: var(--bg); color: var(--text); }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; padding: 28px; background: var(--bg); color: var(--text); }
-    .wrap { max-width: 980px; margin: 0 auto; }
-    .header-row { display:flex; align-items:center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-    .linklike { background: transparent; border: none; color: var(--muted); cursor: pointer; text-decoration: underline; padding: 4px 6px; border-radius: 6px; }
-    .linklike { background: transparent; border: none; color: var(--muted); cursor: pointer; text-decoration: underline; padding: 4px 6px; border-radius: 6px; }
-    .linklike:hover { color: var(--text); background: rgba(0,0,0,.03); }
-    input[type="text"] { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; background: var(--panel); color: var(--text); outline: none; }
-    input[type="text"]::placeholder { color: #94a3b8; }
-    select { padding: 10px 12px; border-radius: 10px; background: var(--panel); color: var(--text); border: 1px solid var(--border); }
-    button { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); background: #ffffff; color: var(--text); cursor: pointer; }
-    button:hover { background: #f3f4f6; }
-  /* Bootstrap buttons themed with palette */
-  .btn-primary { background-color: var(--purple-pain); border-color: var(--purple-pain); }
-  .btn-primary:hover, .btn-primary:focus { background-color: #734aa1; border-color: #734aa1; }
-  .btn-outline-secondary { color: var(--purple-pain); border-color: var(--medium-purple); }
-  .btn-outline-secondary:hover, .btn-outline-secondary:focus { background-color: var(--medium-purple); color: #fff; border-color: var(--medium-purple); }
-  .q-wrap { position: relative; }
-  .list { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; max-height: 360px; overflow-y: auto; z-index: 1040; }
-    .item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; color: var(--text); }
-    .item + .item { border-top: 1px solid var(--border); }
-    .item:hover, .item.active { background: rgba(132, 88, 179, .08); /* accent tint */ box-shadow: inset 3px 0 0 var(--accent-2); }
-    .item span { flex: 1; min-width: 0; }
-    .item strong { color: var(--purple-pain); }
-    .badge { font-size: 11px; border: 1px solid var(--border); color: var(--muted); padding: 2px 6px; border-radius: 999px; background: #fff; }
-    /* Responsive input grids */
-    .inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .query-grid { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-    #results .card { border: 1px solid var(--border); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); }
-    @media (max-width: 720px) {
-      .inputs-grid, .query-grid { grid-template-columns: 1fr; }
-    }
-    .hint { color: var(--muted); font-size: 13px; margin-top: 10px; }
-    #results .card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); }
-
-    /* Modal */
-  /* Custom modal (namespaced to avoid Bootstrap conflicts) */
-  .ai-modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); display: none; align-items: center; justify-content: center; z-index: 1055; }
-  .ai-modal { width: min(880px, 92vw); max-height: min(80vh, 980px); overflow: auto; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
-  .ai-modal header { display:flex; align-items:center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: linear-gradient(180deg, #fff, rgba(255,255,255,.9)); }
-  .ai-modal header h3 { margin: 0; font-size: 16px; color: var(--text); }
-  .ai-modal header .close { border: none; background: transparent; color: var(--muted); font-size: 20px; line-height: 1; padding: 4px 8px; cursor: pointer; }
-  .ai-modal header .close:hover { color: var(--text); background: rgba(0,0,0,.05); border-radius: 8px; }
-  .ai-modal .content { padding: 14px 16px 18px; }
-  .ai-modal .content h4 { margin: 14px 0 6px; font-size: 14px; color: var(--purple-pain); }
-  .ai-modal .content p, .ai-modal .content li { color: #424a60; font-size: 14px; line-height: 1.6; }
-  .ai-modal .content code, .ai-modal .content kbd { background: var(--freeze-purple); border: 1px solid var(--border); padding: 0 6px; border-radius: 6px; }
-
-  /* Results styling */
-  #results { display: grid; grid-template-columns: 1fr; gap: 10px; }
-  @media (min-width: 900px) { #results { grid-template-columns: 1fr 1fr; } }
-  .result-card { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); box-shadow: var(--shadow); padding: 12px 14px; transition: border-color .2s, transform .06s ease-in-out; }
-  .result-card:hover { border-color: var(--accent-2); transform: translateY(-1px); }
-  .result-content { display: flex; gap: 12px; align-items: flex-start; }
-  .result-img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); background: var(--freeze-purple); flex-shrink: 0; }
-  .result-title { font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
-  .result-meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
-  .result-price { color: var(--purple-pain); font-weight: 600; margin-top: 6px; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="header-row">
-      <h2>Test Autocomplete</h2>
-      <button id="howItWorksBtn" class="linklike" title="Xem cách hoạt động">How it works…</button>
-    </div>
-    <div class="row inputs-grid">
-      <input id="apiBase" class="form-control" type="text" placeholder="API base (vd: https://pepeapi-vv2pcyowoa-as.a.run.app)" value="https://pepeapi-vv2pcyowoa-as.a.run.app" />
-      <input id="token" class="form-control" type="text" placeholder="Authorization token (vd: Pepeiscool hoặc Bearer ...)" value="Pepeiscool" />
-    </div>
-  <div style="height: 8px"></div>
-  <div class="hint">Endpoint: <span id="endpointPreview">GET https://pepeapi-vv2pcyowoa-as.a.run.app/api/search/suggest_keywords?query=...</span></div>
-    <div class="row query-grid">
-      <div class="q-wrap">
-        <input id="q" class="form-control" type="text" placeholder="Gõ thử: r, roy, royal, thuc... (Enter để tìm)" autocomplete="off" />
-        <div class="list" id="list" style="display:none"></div>
-      </div>
-      <select id="limit" class="form-select" title="Số kết quả / trang">
-        <option value="10" selected>10</option>
-        <option value="20">20</option>
-        <option value="50">50</option>
-      </select>
-    </div>
-    <div class="row" style="margin-top:8px; gap:16px; flex-wrap: wrap;">
-  <label><input type="checkbox" id="showTypeScore" /> Hiện type/score</label>
-      <label><input type="checkbox" id="autoTrackClick" checked /> Gửi suggest_click khi chọn</label>
-      <!--
-      <button id="btnRebuildVectors" title="POST /api/search/rebuild_keyword_vectors">Rebuild vectors</button>
-      <button id="btnRebuildDict" title="POST /api/search/rebuild_dictionary">Rebuild dictionary</button>
-      -->
-      
-      <button id="btnStats1d" class="btn btn-outline-secondary" title="GET /api/search/suggest_stats">Xem stats 24h</button>
-      <button id="btnToggleAdmin" class="btn btn-outline-secondary" title="Hiện/ẩn khu vực Admin">Ẩn Admin</button>
-      <span id="latencyInfo" class="hint"></span>
-    </div>
-    
-    
-
-    <div style="height: 20px"></div>
-    <div id="adminSection">
-    <h3 style="display:flex; align-items:center; gap:8px;">Admin: Custom Phrases</h3>
-    <div class="row" style="gap:12px; flex-wrap: wrap; align-items: flex-end;">
-      <div style="flex:1; min-width:220px;">
-        <label style="display:block; font-size:12px; color:#6b7280;">Phrase (ví dụ: thức ăn cho chó)</label>
-        <input id="cp_phrase" type="text" placeholder="Cụm từ chuẩn (không cần viết hoa)" />
-      </div>
-      <div style="flex:1; min-width:180px;">
-        <label style="display:block; font-size:12px; color:#6b7280;">Display (tuỳ chọn)</label>
-        <input id="cp_display" type="text" placeholder="Hiện thị đẹp, nếu để trống sẽ lấy như Phrase" />
-      </div>
-      <div style="width:120px;">
-        <label style="display:block; font-size:12px; color:#6b7280;">Priority</label>
-        <input id="cp_priority" type="number" value="5"  class="form-control"/>
-      </div>
-      <button id="cp_add" class="btn btn-primary">Thêm/Update</button>
-      <button id="cp_cancel" class="btn btn-outline-secondary" style="display:none;">Hủy sửa</button>
-      <button id="cp_refresh" class="btn btn-outline-secondary">Tải danh sách</button>
-      <button id="cp_import" class="btn btn-outline-secondary">Import file (.txt)</button>
-      <input id="cp_file" type="file" accept=".txt" style="display:none;" />
-    </div>
-    <div id="cp_list" style="margin-top:10px; border:1px solid #e5e5e5; border-radius:6px; padding:8px;"></div>
-    </div>
-
-    <div style="height: 16px"></div>
-    <div id="resultsWrap" style="display:none">
-      <div id="resultsHeader" class="row" style="justify-content: space-between;">
-        <div><strong>Kết quả tìm kiếm</strong> <span id="queryEcho" style="color:#6b7280"></span></div>
-        <div class="row">
-          <button id="prevBtn" class="btn btn-outline-secondary">« Trước</button>
-          <div style="min-width: 60px; text-align:center">Trang <span id="pageNum">1</span></div>
-          <button id="nextBtn" class="btn btn-outline-secondary">Sau »</button>
+    <title>Test Autocomplete</title>
+    <link rel="stylesheet" href="css/styles.css" />
+            <div class="list" id="list" style="display:none"></div>
+          </div>
+          <select id="limit" class="form-select" title="Số kết quả / trang">
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+        <div class="row" style="margin-top:8px; gap:12px; flex-wrap:wrap; align-items:center;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <button id="btnStats1d" class="btn btn-outline-secondary" title="GET /api/search/suggest_stats">Stats 24h</button>
+            <button id="btnToggleAdmin" class="btn btn-outline-secondary" title="Hiện/ẩn khu vực Admin">Ẩn Admin</button>
+            <button id="btnDarkMode" class="btn btn-outline-secondary" title="Dark / Light">Dark</button>
+          </div>
+          <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
+            <label style="margin:0; font-size:13px;"><input type="checkbox" id="showTypeScore" /> Hiện type/score</label>
+            <label style="margin:0; font-size:13px;"><input type="checkbox" id="autoTrackClick" checked /> Auto click track</label>
+            <span id="latencyInfo" class="hint" style="min-width:80px;"></span>
+          </div>
+        </div>
+        <div style="height: 18px"></div>
+        <div id="resultsWrap" style="display:none">
+          <div id="resultsHeader" class="row" style="justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+            <div style="display:flex; gap:6px; align-items:center; font-size:15px;">
+              <strong>Kết quả</strong>
+              <span id="queryEcho" style="color:#6b7280"></span>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+              <button id="prevBtn" class="btn btn-outline-secondary" style="padding:6px 10px;">«</button>
+              <div style="font-size:14px; min-width:66px; text-align:center;">Trang <span id="pageNum">1</span></div>
+              <button id="nextBtn" class="btn btn-outline-secondary" style="padding:6px 10px;">»</button>
+            </div>
+          </div>
+          <div id="didYouMeanWrap" class="hint" style="display:none; margin-top:6px;"></div>
+          <div id="results" style="margin-top:8px;"></div>
         </div>
       </div>
-      <div id="didYouMeanWrap" class="hint" style="display:none; margin-top:6px;"></div>
-  <div id="results" style="margin-top:8px;"></div>
+      <div class="admin-col" id="adminSection">
+        <h3 style="display:flex; align-items:center; gap:8px;">Admin: Custom Phrases</h3>
+        <div class="row" style="gap:12px; flex-wrap: wrap; align-items:flex-end;">
+          <div style="flex:1 1 230px;">
+            <label style="display:block; font-size:12px; color:#6b7280;">Phrase (ví dụ: thức ăn cho chó)</label>
+            <input id="cp_phrase" type="text" placeholder="Cụm từ chuẩn (không cần viết hoa)" />
+          </div>
+          <div style="flex:1 1 200px;">
+            <label style="display:block; font-size:12px; color:#6b7280;">Display (tuỳ chọn)</label>
+            <input id="cp_display" type="text" placeholder="Hiện thị đẹp (nếu trống dùng Phrase)" />
+          </div>
+          <div style="width:120px;">
+            <label style="display:block; font-size:12px; color:#6b7280;">Priority</label>
+            <input id="cp_priority" type="number" value="5"  class="form-control"/>
+          </div>
+          <div style="flex:1 1 100%; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <button id="cp_add" class="btn btn-primary" style="min-width:130px;">Thêm/Update</button>
+            <button id="cp_cancel" class="btn btn-outline-secondary" style="display:none;">Hủy</button>
+            <button id="cp_refresh" class="btn btn-outline-secondary" title="Tải lại" style="padding:6px 12px;">↻</button>
+            <button id="cp_import" class="btn btn-outline-secondary" style="white-space:nowrap;">Import (.txt)</button>
+            <button id="cp_import_delete" class="btn btn-outline-danger" style="white-space:nowrap;">Import Xoá (.txt)</button>
+            <input id="cp_file" type="file" accept=".txt" style="display:none;" />
+            <input id="cp_delete_file" type="file" accept=".txt" style="display:none;" />
+          </div>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <input id="cp_search" type="text" placeholder="Lọc nhanh (server filter)" style="flex:1; min-width:200px;" />
+          <button id="cp_clear_filter" class="btn btn-outline-secondary" type="button" title="Xoá filter & tải tất cả" style="padding:6px 10px; line-height:1;">⟳</button>
+          <select id="cp_limit" class="form-select" style="width:100px;">
+            <option value="20">20</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+          <div style="display:flex; gap:4px; align-items:center;">
+            <button id="cp_prev" class="btn btn-outline-secondary" disabled>«</button>
+            <span id="cp_page_info" class="hint">Trang 1</span>
+            <button id="cp_next" class="btn btn-outline-secondary" disabled>»</button>
+          </div>
+        </div>
+        <div id="cp_list" style="margin-top:6px; border:1px solid #e5e5e5; border-radius:6px; padding:8px;"></div>
+      </div>
     </div>
 
     <!-- Modal: How it works -->
@@ -192,8 +139,55 @@
           <p>Nội dung chi tiết hơn nằm trong README đính kèm. Phần tóm tắt ở đây được cô đọng cho mục đích dùng nhanh.</p>
           <hr class="my-3"/>
           <div class="d-flex flex-wrap gap-2">
-            <a href="README-suggest.md" class="btn btn-sm btn-outline-primary" download>Download README (.md)</a>
-            <a href="README-suggest.md" class="btn btn-sm btn-link" target="_blank" rel="noopener">Xem README (mở tab mới)</a>
+            <a href="README_suggest_keywords_full.md" class="btn btn-sm btn-outline-primary" download>Tải Full README v2 (.md)</a>
+            <a href="readme.html?file=full" class="btn btn-sm btn-link" target="_blank" rel="noopener">Xem Full README</a>
+            <a href="readme.html?file=overview" class="btn btn-sm btn-link" target="_blank" rel="noopener">Xem Overview</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal: Import guide -->
+    <div id="importModal" class="ai-modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="ai-modal" role="document">
+        <header>
+          <h3>Hướng dẫn Import Custom Phrases</h3>
+          <button class="close" id="importClose" aria-label="Đóng">×</button>
+        </header>
+        <div class="content">
+          <p>File phải là <strong>.txt</strong>. Mỗi dòng trong file tương ứng <strong>1 custom phrase</strong>.</p>
+          <ul>
+            <li>Các dòng trống sẽ bị bỏ qua tự động.</li>
+            <li>Không cần viết hoa đầu câu hay dấu ở cuối.</li>
+            <li>Hãy chọn trước <strong>Priority</strong> (ô Priority ở form). Tất cả phrase trong file sẽ dùng chung priority đó.</li>
+            <li>Nếu phrase đã tồn tại: backend sẽ <strong>merge</strong> (giữ display cũ trừ khi bạn nhập display mới ở form; priority sẽ lấy giá trị cao hơn giữa cũ và mới).</li>
+          </ul>
+          <p>Sau khi bấm <em>“Đã hiểu, chọn file…”</em> hệ thống sẽ mở hộp thoại để bạn chọn file .txt. Nhấn <em>Back</em> hoặc click ra ngoài để huỷ.</p>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button id="importBack" class="btn btn-outline-secondary" type="button">Back</button>
+            <button id="importOk" class="btn btn-primary" type="button">Đã hiểu, chọn file…</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- Modal: Import Delete guide (flexible match) -->
+    <div id="importDelModal" class="ai-modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="ai-modal" role="document">
+        <header>
+          <h3>Import danh sách cần XÓA</h3>
+          <button class="close" id="importDelClose" aria-label="Đóng">×</button>
+        </header>
+        <div class="content">
+          <p>File phải là <strong>.txt</strong>. Mỗi dòng = 1 cụm cần xoá.</p>
+          <ul>
+            <li>Dòng trống sẽ bỏ qua.</li>
+            <li>Hệ thống sẽ tìm theo <code>phrase</code> (exact, case-insensitive & bỏ dấu) trước; nếu không thấy thử match <code>display</code>.</li>
+            <li>Nếu nhiều kết quả: chọn kết quả ưu tiên match phrase exact, sau đó tới display, cuối cùng lấy dòng đầu.</li>
+            <li>Nếu không tìm được gì: ghi dòng đó vào danh sách <em>Not Found</em>.</li>
+          </ul>
+          <p>Sau khi bấm <em>“Đã hiểu, chọn file…”</em> chọn file .txt. Hệ thống xoá theo batch & báo thống kê.</p>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button id="importDelBack" class="btn btn-outline-secondary" type="button">Back</button>
+            <button id="importDelOk" class="btn btn-danger" type="button">Đã hiểu, chọn file…</button>
           </div>
         </div>
       </div>
@@ -228,33 +222,174 @@
   const cp_cancel = document.getElementById('cp_cancel');
   const cp_refresh = document.getElementById('cp_refresh');
   const cp_list = document.getElementById('cp_list');
+  const cp_search = document.getElementById('cp_search');
+  const cp_clear_filter = document.getElementById('cp_clear_filter');
+  const cp_limit = document.getElementById('cp_limit');
+  const cp_prev = document.getElementById('cp_prev');
+  const cp_next = document.getElementById('cp_next');
+  const cp_page_info = document.getElementById('cp_page_info');
   const cp_import = document.getElementById('cp_import');
   const cp_file = document.getElementById('cp_file');
+  const cp_import_delete = document.getElementById('cp_import_delete');
+  const cp_delete_file = document.getElementById('cp_delete_file');
   const adminSection = document.getElementById('adminSection');
   const btnToggleAdmin = document.getElementById('btnToggleAdmin');
   const howItWorksBtn = document.getElementById('howItWorksBtn');
   const howModal = document.getElementById('howModal');
   const howClose = document.getElementById('howClose');
+  const btnDarkMode = document.getElementById('btnDarkMode');
+  // Import modal elements
+  const importModal = document.getElementById('importModal');
+  const importClose = document.getElementById('importClose');
+  const importOk = document.getElementById('importOk');
+  const importBack = document.getElementById('importBack');
+  const importDelModal = document.getElementById('importDelModal');
+  const importDelClose = document.getElementById('importDelClose');
+  const importDelOk = document.getElementById('importDelOk');
+  const importDelBack = document.getElementById('importDelBack');
 
     let timer;
     let activeIndex = -1;
   let currentPage = 1;
 
-      // Modal handlers
+      // Modal helpers
       function openHowModal() {
+        if (!howModal) return;
         howModal.style.display = 'flex';
         howModal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
       }
       function closeHowModal() {
+        if (!howModal) return;
         howModal.style.display = 'none';
         howModal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
       }
       howItWorksBtn?.addEventListener('click', openHowModal);
       howClose?.addEventListener('click', closeHowModal);
       howModal?.addEventListener('click', (e) => { if (e.target === howModal) closeHowModal(); });
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeHowModal(); });
+
+      // Import modal helpers
+      function openImportModal() {
+        if (!importModal) return;
+        importModal.style.display = 'flex';
+        importModal.setAttribute('aria-hidden', 'false');
+      }
+      function closeImportModal() {
+        if (!importModal) return;
+        importModal.style.display = 'none';
+        importModal.setAttribute('aria-hidden', 'true');
+      }
+      importClose?.addEventListener('click', closeImportModal);
+      importBack?.addEventListener('click', closeImportModal);
+      importModal?.addEventListener('click', (e) => { if (e.target === importModal) closeImportModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeImportModal(); });
+      importOk?.addEventListener('click', () => {
+        closeImportModal();
+        if (cp_file) {
+          cp_file.value = '';
+          // slight delay to ensure modal close animation (if any) completes
+          setTimeout(() => cp_file.click(), 30);
+        }
+      });
+
+      // Import DELETE modal helpers
+      function openImportDelModal() {
+        if (!importDelModal) return;
+        importDelModal.style.display = 'flex';
+        importDelModal.setAttribute('aria-hidden', 'false');
+      }
+      function closeImportDelModal() {
+        if (!importDelModal) return;
+        importDelModal.style.display = 'none';
+        importDelModal.setAttribute('aria-hidden', 'true');
+      }
+      importDelClose?.addEventListener('click', closeImportDelModal);
+      importDelBack?.addEventListener('click', closeImportDelModal);
+      importDelModal?.addEventListener('click', (e) => { if (e.target === importDelModal) closeImportDelModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeImportDelModal(); });
+      importDelOk?.addEventListener('click', () => {
+        closeImportDelModal();
+        if (cp_delete_file) {
+          cp_delete_file.value = '';
+          setTimeout(() => cp_delete_file.click(), 30);
+        }
+      });
+
+      // Modal handlers
+      let cpPage = 1;
+      let cpTotalPages = 1;
+      function updateCpPageInfo(total, limit) {
+        cp_page_info.textContent = `Trang ${cpPage}/${cpTotalPages}`;
+        cp_prev.disabled = cpPage <= 1;
+        cp_next.disabled = cpPage >= cpTotalPages;
+      }
+
+      // Track editing id (moved up to avoid TDZ when loadCustomPhrases() runs early)
+      let editingId = null;
+
+      async function loadCustomPhrases(opts = {}) {
+        if (opts.resetPage) cpPage = 1;
+        const base = apiBase.value.replace(/\/$/, '');
+        const limit = parseInt(cp_limit.value, 10) || 50;
+        const qFilter = (cp_search.value || '').trim();
+        const params = new URLSearchParams({ limit: String(limit), page: String(cpPage) });
+        if (qFilter) params.set('q', qFilter);
+        const url = `${base}/api/search/custom_phrases?${params.toString()}`;
+        const headers = {};
+        const tk = token.value.trim();
+        if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+        const res = await fetch(url, { headers });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        const rows = json?.data || [];
+        const meta = json?.pagination || {};
+        cpTotalPages = meta.pages || 1;
+        cp_list.innerHTML = '';
+        rows.forEach((r) => {
+          const rid = r?._id || r?.id || r?._doc?._id || r?.pk || '';
+          const div = document.createElement('div');
+          div.style.display = 'flex';
+          div.style.justifyContent = 'space-between';
+          div.style.alignItems = 'center';
+          div.style.padding = '6px 8px';
+          div.style.borderBottom = '1px solid #eee';
+          const title = document.createElement('div');
+          const idText = escapeHtml(String(rid || ''));
+          title.innerHTML = `<strong>${escapeHtml(r.display || r.phrase)}</strong><br/><span class="hint">${escapeHtml((r.tokens || []).join(' '))} • priority ${r.priority} • id ${idText}</span>`;
+          const actions = document.createElement('div');
+          actions.style.display = 'flex';
+          actions.style.gap = '8px';
+          const editBtn = document.createElement('button');
+          editBtn.textContent = 'Sửa';
+          editBtn.addEventListener('click', () => {
+            editingId = rid;
+            cp_phrase.value = r.phrase || '';
+            cp_display.value = r.display || '';
+            cp_priority.value = (r.priority ?? 1);
+            cp_add.textContent = 'Lưu (Update)';
+            cp_cancel.style.display = 'inline-block';
+            if (!showAdmin) btnToggleAdmin.click();
+          });
+          const delBtn = document.createElement('button');
+          delBtn.textContent = 'Xoá';
+          delBtn.addEventListener('click', async () => {
+            if (!rid) return alert('Không tìm thấy id để xoá');
+            if (!confirm('Xoá mục này?')) return;
+            try {
+              const ok = await deleteCustomPhrase(rid);
+              if (!ok) return;
+              await loadCustomPhrases();
+            } catch(e) { alert(String(e)); }
+          });
+          actions.appendChild(editBtn);
+          actions.appendChild(delBtn);
+          div.appendChild(title);
+            div.appendChild(actions);
+          cp_list.appendChild(div);
+        });
+        if (!rows.length) cp_list.innerHTML = '<div class="hint">Chưa có phrase nào.</div>';
+        updateCpPageInfo();
+      }
 
     function setList(items) {
       list.innerHTML = '';
@@ -297,10 +432,7 @@
       const url = `${base}/api/search/suggest_keywords?query=${encodeURIComponent(v)}`;
       const headers = {};
       const tk = token.value.trim();
-        if (tk) {
-          // Luôn gửi dạng Bearer <token> để backend parse đúng
-          headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
-      }
+      if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
       const res = await fetch(url, { headers });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       lastSuggestLatency = res.headers.get('x-suggest-latency-ms');
@@ -309,21 +441,74 @@
       return json?.data || [];
     }
 
+    // Fetch custom phrases suggestions (filter) to merge into dropdown
+    async function fetchCustomPhraseSuggest(v) {
+      const base = apiBase.value.replace(/\/$/, '');
+      const qParam = v.trim();
+      if (!qParam) return [];
+      const url = `${base}/api/search/custom_phrases?q=${encodeURIComponent(qParam)}&limit=20&page=1`;
+      const headers = {};
+      const tk = token.value.trim();
+      if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+      try {
+        const res = await fetch(url, { headers });
+        if (!res.ok) return [];
+        const json = await res.json();
+        const rows = json?.data || [];
+        return rows.map(r => ({
+          text: r.display || r.phrase,
+          full: r.display || r.phrase,
+          type: 'custom',
+          score: r.priority ?? 0,
+          priority: r.priority ?? 0,
+          _src: 'custom',
+        }));
+      } catch { return []; }
+    }
+
     function onInput() {
       clearTimeout(timer);
       const v = q.value; // không trim để giữ khoảng trắng cuối
       if (!v || !v.replace(/\s+/g, '')) { setList([]); return; }
       timer = setTimeout(async () => {
         try {
-          const items = await fetchSuggest(v); // gửi nguyên văn để API biết có space cuối
-          activeIndex = items.length ? 0 : -1;
-          setList(items);
+          // Parallel fetch keyword + custom
+          const [kwItems, customItems] = await Promise.all([
+            fetchSuggest(v),
+            fetchCustomPhraseSuggest(v)
+          ]);
+          // Dedupe by lowercased text
+          const seen = new Set();
+          const merged = [];
+          const push = (arr) => arr.forEach(it => {
+            const key = String(it.full || it.text || '').toLowerCase();
+            if (!key) return;
+            if (seen.has(key)) return;
+            seen.add(key);
+            merged.push(it);
+          });
+          // Custom phrases come first
+          push(customItems);
+          push(kwItems);
+          activeIndex = merged.length ? 0 : -1;
+          setList(merged);
         } catch (e) {
           console.error('Suggest error', e);
           setList([]);
         }
       }, 120);
       updateEndpoint();
+
+      // Debounced sync of custom phrases list with main query when Admin visible
+      if (showAdmin) {
+        if (cp_search) cp_search.value = v.trim();
+        clearTimeout(window.__cpSyncTimer);
+        window.__cpSyncTimer = setTimeout(() => {
+          if (!editingId) {
+            loadCustomPhrases({ resetPage: true }).catch(()=>{});
+          }
+        }, 400);
+      }
     }
 
     q.addEventListener('input', onInput);
@@ -380,18 +565,88 @@
     let currentItemsCache = [];
     const normalize = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[.,/#!$%^&*;:{}=\-_`~()\[\]'"+|<>?]/g, ' ').replace(/\s+/g, ' ').trim();
     function renderHighlight(it) {
-      // Hiển thị cả cụm gợi ý hoàn chỉnh (full), bôi đậm phần được tự động hoàn tất
-      const current = q.value || '';
-      const full = String(it.full || it.text || '');
-      if (!current) return escapeHtml(full);
-      // Nếu full bắt đầu bằng current -> bold phần còn lại
-      if (full.toLowerCase().startsWith(current.toLowerCase())) {
-        const head = escapeHtml(full.substring(0, current.length));
-        const tail = escapeHtml(full.substring(current.length));
-        return `${head}<strong>${tail}</strong>`;
+      // Bôi đậm từng token người dùng đã gõ xuất hiện trong cụm gợi ý (không phân biệt hoa/thường & dấu)
+      const queryRaw = q.value || '';
+      const phrase = String(it.full || it.text || '');
+      if (!queryRaw.trim()) return escapeHtml(phrase);
+
+      // Chuẩn hoá để so khớp (bỏ dấu tiếng Việt, ký tự đặc biệt -> space)
+      const normalize = (s) => (s||'').toLowerCase().normalize('NFD')
+        .replace(/[\u0300-\u036f]/g,'')
+        .replace(/[^a-z0-9àáạảãăằắặẳẵâầấậẩẫèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ\s]/g,' ')
+        .replace(/\s+/g,' ') // collapse
+        .trim();
+
+      // Tokenize query (giữ thứ tự, loại token ngắn rỗng)
+      const qTokens = normalize(queryRaw).split(' ').filter(t => t.length);
+      if (!qTokens.length) return escapeHtml(phrase);
+
+      // Duyệt phrase theo ký tự, tạo map vị trí các lần khớp token (ưu tiên dài hơn)
+      const normPhrase = normalize(phrase);
+      // Ta cần ánh xạ index trong normPhrase về index trong original phrase.
+      // Cách đơn giản: tạo mảng mapChar từ normPhrase char -> original substring index.
+      const originalChars = [...phrase];
+      const lowered = phrase.toLowerCase();
+      // Để đơn giản & vẫn chính xác phần lớn: Khi highlight ta dựa vào substring trong phiên bản thường (lowered) tìm trong lowered.
+
+      // Sắp xếp token theo độ dài giảm để tránh lồng highlight ("thuc an" chứa "thuc")
+      const sortedTokens = [...new Set(qTokens)].sort((a,b)=>b.length - a.length);
+
+      // Ta sẽ xây dựng một mảng các đoạn {text, hit:boolean}
+      const segments = [];
+      let i = 0;
+      const loweredNoAccent = normalize(lowered); // lowered đã bỏ dấu qua normalize()
+      // Ta cũng cần mapping giữa loweredNoAccent và lowered (có dấu) để cắt theo index.
+      // Tạo chuỗi loweredNoAccentFromOriginal đi từng char original => char đã normalize (chỉ lấy nhóm base)
+      const map = []; // map index trong loweredNoAccent -> index bắt đầu trong phrase original
+      const rebuilt = []; // rebuilt chuỗi từ original theo normalize char-by-char
+      for (let oi=0; oi<phrase.length; oi++) {
+        const ch = phrase[oi];
+        const base = ch.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+        // base có thể >1 (hiếm), ta lấy từng char
+        for (const bc of base) {
+          map.push(oi);
+          rebuilt.push(bc.toLowerCase());
+        }
       }
-      // fallback: không chắc chắn, hiển thị bình thường
-      return escapeHtml(full);
+      const rebuiltStr = rebuilt.join('');
+
+      // Đánh dấu các khoảng match trong rebuiltStr
+      // Tạo array same length with false
+      const mark = new Array(rebuiltStr.length).fill(false);
+      for (const tok of sortedTokens) {
+        if (!tok) continue;
+        let start = 0;
+        while (start < rebuiltStr.length) {
+          const idx = rebuiltStr.indexOf(tok, start);
+          if (idx === -1) break;
+            // Kiểm tra ranh giới từ (trước & sau không phải chữ/ số) để tránh highlight bên trong từ dài khác
+            const leftOk = idx === 0 || /[^a-z0-9]/.test(rebuiltStr[idx-1]);
+            const rightPos = idx + tok.length;
+            const rightOk = rightPos === rebuiltStr.length || /[^a-z0-9]/.test(rebuiltStr[rightPos]);
+            if (leftOk && rightOk) {
+              for (let k = idx; k < idx + tok.length; k++) mark[k] = true;
+            }
+            start = idx + tok.length; // tiếp tục sau match
+        }
+      }
+
+      // Convert mark array thành segments dựa trên original phrase indexes
+      let curHit = mark[0] || false;
+      let segStart = 0;
+      for (let pos=1; pos<=mark.length; pos++) {
+        if (pos === mark.length || mark[pos] !== curHit) {
+          // segment từ segStart..pos-1 trong rebuiltStr -> mapping sang original indexes
+          const origStart = map[segStart];
+          const origEnd = map[pos-1] + 1; // slice end
+          const textSeg = phrase.slice(origStart, origEnd);
+          segments.push({ text: textSeg, hit: curHit });
+          segStart = pos;
+          curHit = mark[pos];
+        }
+      }
+      // Gộp lại thành HTML
+      return segments.map(s => `<span class="${s.hit? 'suggest-hit':'suggest-frag'}">${escapeHtml(s.text)}</span>`).join('');
     }
 
     // Override setList to keep cache in sync
@@ -413,6 +668,7 @@
 
     // Admin toggle: persist to localStorage
     const ADMIN_TOGGLE_KEY = 'showAdmin@autocomplete';
+  const DARK_MODE_KEY = 'darkMode@autocomplete';
     function applyAdminVisibility(show) {
       adminSection.style.display = show ? 'block' : 'none';
       btnToggleAdmin.textContent = show ? 'Ẩn Admin' : 'Hiện Admin';
@@ -420,6 +676,15 @@
     const savedShowAdmin = localStorage.getItem(ADMIN_TOGGLE_KEY);
     let showAdmin = savedShowAdmin === null ? false : savedShowAdmin === '1';
     applyAdminVisibility(showAdmin);
+    // Auto collapse on mobile first load
+    function isMobileWidth(){ return window.innerWidth < 780; }
+    if (isMobileWidth()) {
+      // Override to collapsed unless user explicitly enabled before
+      if (savedShowAdmin === null) {
+        showAdmin = false;
+        applyAdminVisibility(false);
+      }
+    }
     if (showAdmin) {
       // preload list when visible
       loadCustomPhrases().catch(()=>{});
@@ -430,6 +695,25 @@
       localStorage.setItem(ADMIN_TOGGLE_KEY, showAdmin ? '1' : '0');
       if (showAdmin) {
         loadCustomPhrases().catch(()=>{});
+      }
+    });
+
+    // Dark mode persistence
+    const savedDark = localStorage.getItem(DARK_MODE_KEY);
+    if (savedDark === '1') {
+      document.body.classList.add('dark');
+      if (btnDarkMode) btnDarkMode.textContent = 'Light';
+    }
+    btnDarkMode?.addEventListener('click', () => {
+      const dark = document.body.classList.toggle('dark');
+      localStorage.setItem(DARK_MODE_KEY, dark ? '1':'0');
+      btnDarkMode.textContent = dark ? 'Light' : 'Dark';
+    });
+
+    window.addEventListener('resize', () => {
+      if (isMobileWidth() && showAdmin && adminSection.style.display !== 'none') {
+        // keep as user set; no force collapse after interaction
+        return;
       }
     });
 
@@ -489,71 +773,21 @@
       }
     });
 
-    // Admin: custom phrases
-    let editingId = null; // track the item being edited
+    // Admin: custom phrases (listeners using paginated loadCustomPhrases)
 
-    async function loadCustomPhrases() {
-      const base = apiBase.value.replace(/\/$/, '');
-      const url = `${base}/api/search/custom_phrases`;
-      const headers = {};
-      const tk = token.value.trim();
-      if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
-      const res = await fetch(url, { headers });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const json = await res.json();
-      const rows = json?.data || [];
-      cp_list.innerHTML = '';
-      rows.forEach((r) => {
-        const rid = r?._id || r?.id || r?._doc?._id || r?.pk || '';
-        const div = document.createElement('div');
-        div.style.display = 'flex';
-        div.style.justifyContent = 'space-between';
-        div.style.alignItems = 'center';
-        div.style.padding = '6px 8px';
-        div.style.borderBottom = '1px solid #eee';
-  const title = document.createElement('div');
-  const idText = escapeHtml(String(rid || ''));
-  title.innerHTML = `<strong>${escapeHtml(r.display || r.phrase)}</strong><br/><span class="hint">${escapeHtml((r.tokens || []).join(' '))} • priority ${r.priority} • id ${idText}</span>`;
-        const actions = document.createElement('div');
-        actions.style.display = 'flex';
-        actions.style.gap = '8px';
-        const editBtn = document.createElement('button');
-        editBtn.textContent = 'Sửa';
-        editBtn.addEventListener('click', () => {
-          editingId = rid;
-          cp_phrase.value = r.phrase || '';
-          cp_display.value = r.display || '';
-          cp_priority.value = (r.priority ?? 1);
-          cp_add.textContent = 'Lưu (Update)';
-          cp_cancel.style.display = 'inline-block';
-          // ensure admin visible when editing
-          if (!showAdmin) {
-            btnToggleAdmin.click();
-          }
-        });
-        const del = document.createElement('button');
-        del.textContent = 'Xoá';
-        del.addEventListener('click', async () => {
-          if (!rid) return alert('Không tìm thấy id để xoá');
-          if (!confirm('Xoá mục này?')) return;
-          try {
-            const ok = await deleteCustomPhrase(rid);
-            if (!ok) return; // deleteCustomPhrase already alerted error
-            await loadCustomPhrases();
-          } catch(e) {
-            alert(String(e));
-          }
-        });
-        actions.appendChild(editBtn);
-        actions.appendChild(del);
-        div.appendChild(title);
-        div.appendChild(actions);
-        cp_list.appendChild(div);
-      });
-      if (!rows.length) cp_list.innerHTML = '<div class="hint">Chưa có phrase nào.</div>';
-    }
-
-    cp_refresh?.addEventListener('click', () => loadCustomPhrases().catch(e => alert(String(e))));
+    cp_refresh?.addEventListener('click', () => loadCustomPhrases({}).catch(e => alert(String(e))));
+    cp_limit?.addEventListener('change', () => loadCustomPhrases({ resetPage: true }).catch(e => console.warn(e)) );
+    cp_prev?.addEventListener('click', () => { if (cpPage > 1) { cpPage--; loadCustomPhrases().catch(()=>{}); }});
+    cp_next?.addEventListener('click', () => { if (cpPage < cpTotalPages) { cpPage++; loadCustomPhrases().catch(()=>{}); }});
+    let cpSearchTimer;
+    cp_search?.addEventListener('input', () => {
+      clearTimeout(cpSearchTimer);
+      cpSearchTimer = setTimeout(() => loadCustomPhrases({ resetPage: true }).catch(()=>{}), 350);
+    });
+    cp_clear_filter?.addEventListener('click', () => {
+      if (cp_search) cp_search.value = '';
+      loadCustomPhrases({ resetPage: true }).catch(()=>{});
+    });
     cp_cancel?.addEventListener('click', () => {
       editingId = null;
       cp_add.textContent = 'Thêm/Update';
@@ -603,14 +837,19 @@
         cp_cancel.style.display = 'none';
         cp_phrase.value = '';
         cp_display.value = '';
-        loadCustomPhrases().catch(e => alert(String(e)));
+        loadCustomPhrases({ resetPage: true }).catch(e => alert(String(e)));
       } catch (e) {
         alert(String(e));
       }
     });
 
-    // Import file (.txt) — mỗi dòng là 1 phrase
-    cp_import?.addEventListener('click', () => cp_file?.click());
+    // Import file (.txt) — show instruction modal first
+    cp_import?.addEventListener('click', () => {
+      if (importModal) openImportModal(); else cp_file?.click();
+    });
+    cp_import_delete?.addEventListener('click', () => {
+      if (importDelModal) openImportDelModal(); else cp_delete_file?.click();
+    });
     cp_file?.addEventListener('change', async (ev) => {
       const file = ev.target.files?.[0];
       if (!file) return;
@@ -621,7 +860,7 @@
         const unique = Array.from(new Set(lines));
         if (!confirm(`Import ${unique.length} dòng?`)) return;
         const base = apiBase.value.replace(/\/$/, '');
-        const url = `${base}/api/search/custom_phrases`;
+  const url = `${base}/api/search/custom_phrases?merge=1`;
         const headers = { 'Content-Type': 'application/json' };
         const tk = token.value.trim();
         if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
@@ -643,6 +882,73 @@
         await loadCustomPhrases();
       } catch (e) {
         alert('Import lỗi: ' + String(e));
+      } finally {
+        ev.target.value = '';
+      }
+    });
+
+    // Bulk delete import (.txt) — flexible resolve (phrase/display)
+    cp_delete_file?.addEventListener('change', async (ev) => {
+      const file = ev.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+        if (!lines.length) return alert('File rỗng hoặc không có dòng hợp lệ');
+        if (!confirm(`Xoá theo file: ${lines.length} dòng?`)) return;
+        const base = apiBase.value.replace(/\/$/, '');
+  const headers = { 'Content-Type': 'application/json' };
+        const tk = token.value.trim();
+        if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+  let deleted = 0, notFound = [], failed = [];
+        const t0 = performance.now();
+        async function resolveId(line){
+          try {
+            const qUrl = `${base}/api/search/custom_phrases?q=${encodeURIComponent(line)}&limit=20&page=1`;
+            const res = await fetch(qUrl, { headers });
+            if (!res.ok) return { id: null, phrase: line };
+            const js = await res.json();
+            const rows = js?.data || [];
+            if (!rows.length) return { id: null, phrase: line };
+            const fold = (s)=> (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+            const lineFold = fold(line);
+            let cand = rows.find(r => fold(r.phrase||'') === lineFold);
+            if (!cand) cand = rows.find(r => fold(r.display||'') === lineFold);
+            if (!cand) cand = rows[0];
+            const id = cand._id || cand.id || cand.pk || cand.phrase;
+            return { id, phrase: cand.phrase || line };
+          } catch { return { id: null, phrase: line }; }
+        }
+        const chunkSize = 10;
+        for (let i = 0; i < lines.length; i += chunkSize) {
+          const chunk = lines.slice(i, i + chunkSize);
+            await Promise.all(chunk.map(async line => {
+              const { id } = await resolveId(line);
+              const delBody = { id: id || line };
+              try {
+                const res = await fetch(`${base}/api/search/custom_phrases`, { method: 'DELETE', headers, body: JSON.stringify(delBody) });
+                if (res.ok) {
+                  deleted++; return;
+                }
+                // fallback query param
+                const res2 = await fetch(`${base}/api/search/custom_phrases?id=${encodeURIComponent(id || line)}`, { method: 'DELETE', headers });
+                if (res2.ok) { deleted++; return; }
+                // fallback path param
+                const res3 = await fetch(`${base}/api/search/custom_phrases/${encodeURIComponent(id || line)}`, { method: 'DELETE', headers });
+                if (res3.ok) { deleted++; return; }
+                if (res.status === 404 || res2.status === 404 || res3.status === 404) notFound.push(line); else failed.push(line);
+              } catch { failed.push(line); }
+            }));
+        }
+        const dt = Math.round(performance.now() - t0);
+        let msg = `Xoá xong: ${deleted} OK / ${lines.length}\n`;
+        if (notFound.length) msg += `Not found (${notFound.length}): ${notFound.slice(0,5).join(', ')}${notFound.length>5?' ...':''}\n`;
+        if (failed.length) msg += `Failed (${failed.length}): ${failed.slice(0,5).join(', ')}${failed.length>5?' ...':''}\n`;
+        msg += `Latency: ${dt}ms`;
+        alert(msg);
+        await loadCustomPhrases();
+      } catch (e) {
+        alert('Import xoá lỗi: ' + String(e));
       } finally {
         ev.target.value = '';
       }
@@ -772,7 +1078,5 @@
       alert('Xoá thất bại. ID: ' + id + '\n' + errors.join('\n---\n'));
       return false;
     }
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-</body>
+  <script src="js/app.js" defer></script>
 </html>

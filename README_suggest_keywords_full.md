@@ -1,13 +1,6 @@
-<!--
-  This file intentionally REPLACED the older brief design doc.
-  Full Documentation v2 below (synchronized copy). Single source of truth lives here & in README_suggest_keywords_full.md.
--->
-
 # Suggest Keywords System (Full Documentation v2)
 
 Comprehensive design & implementation reference for the autocomplete endpoint `GET /api/search/suggest_keywords` plus related data building, online learning and operational concerns.
-
-> NOTE: This supersedes the legacy short README. If you only need a quick mental model, read Sections 1–6 then 22.
 
 ---
 ## 1. Overview
@@ -371,4 +364,3 @@ async function suggest(q) {
 
 ---
 End of Full Documentation v2.
-
