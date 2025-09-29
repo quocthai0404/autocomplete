@@ -165,14 +165,17 @@
     <div class="layout">
       <div class="main-col">
         <div class="row inputs-grid">
-          <input id="apiBase" class="form-control" type="text" placeholder="API base (vd: https://pepeapi-vv2pcyowoa-as.a.run.app)" value="https://pepeapi-vv2pcyowoa-as.a.run.app" />
+          <input id="apiBase" class="form-control" type="text" placeholder="API base (vd: http://localhost:4200)" value="http://localhost:4200" />
           <input id="token" class="form-control" type="text" placeholder="Authorization token (vd: Pepeiscool hoặc Bearer ...)" value="Pepeiscool" />
         </div>
         <div style="height: 8px"></div>
-        <div class="hint">Endpoint: <span id="endpointPreview">GET https://pepeapi-vv2pcyowoa-as.a.run.app/api/search/suggest_keywords?query=...</span></div>
+        <div class="hint">Endpoint: <span id="endpointPreview">GET http://localhost:4200/api/search/suggest_keywords?query=...</span></div>
         <div class="row query-grid" style="margin-top:6px;">
           <div class="q-wrap">
-            <input id="q" class="form-control" type="text" placeholder="Gõ thử: r, roy, royal, thuc... (Enter để tìm)" autocomplete="off" />
+            <div style="display:flex; gap:6px; width:100%; align-items:center;">
+              <input id="q" class="form-control" type="text" placeholder="Gõ thử: r, roy, royal, thuc... (Enter hoặc kính lúp)" autocomplete="off" />
+              <button id="btnSearchNow" type="button" class="btn btn-primary" title="Tìm ngay (gọi /api/search)">🔍</button>
+            </div>
             <div class="list" id="list" style="display:none"></div>
           </div>
           <select id="limit" class="form-select" title="Số kết quả / trang">
@@ -211,43 +214,99 @@
         </div>
       </div>
       <div class="admin-col" id="adminSection">
-        <h3 style="display:flex; align-items:center; gap:8px;">Admin: Custom Phrases</h3>
-        <div class="row" style="gap:12px; flex-wrap: wrap; align-items:flex-end;">
-          
-          <div style="flex:1 1 200px;">
-            <label style="display:block; font-size:12px; color:#6b7280;">Display (tuỳ chọn)</label>
-            <input id="cp_display" type="text" placeholder="Hiện thị đẹp (nếu trống dùng Phrase)" />
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
+          <h3 style="margin:0; font-size:18px;">Admin</h3>
+          <div style="display:flex; gap:6px;">
+            <button id="tabCustomPhrases" class="btn btn-sm btn-primary" type="button">Custom Phrases</button>
+            <button id="tabSpellOverrides" class="btn btn-sm btn-outline-secondary" type="button">Spell Overrides</button>
           </div>
-          <div style="width:120px;">
-            <label style="display:block; font-size:12px; color:#6b7280;">Priority</label>
-            <input id="cp_priority" type="number" value="5"  class="form-control"/>
-          </div>
-          <div style="flex:1 1 100%; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-            <button id="cp_add" class="btn btn-primary" style="min-width:130px;">Thêm/Update</button>
-            <button id="cp_cancel" class="btn btn-outline-secondary" style="display:none;">Hủy</button>
-            <button id="cp_refresh" class="btn btn-outline-secondary" title="Tải lại" style="padding:6px 12px;">↻</button>
-            <button id="cp_import" class="btn btn-outline-secondary" style="white-space:nowrap;">Import (.txt)</button>
-            <button id="cp_import_delete" class="btn btn-outline-danger" style="white-space:nowrap;">Import Xoá (.txt)</button>
-            <input id="cp_file" type="file" accept=".txt" style="display:none;" />
-            <input id="cp_delete_file" type="file" accept=".txt" style="display:none;" />
+          <div id="spellOverrideActions" style="display:none; gap:6px; margin-left:auto;">
+            <button id="so_reload" class="btn btn-sm btn-outline-secondary" title="Reload override cache">Reload Cache</button>
+            <button id="so_new" class="btn btn-sm btn-primary" title="Thêm override">Thêm / Update</button>
           </div>
         </div>
-        <div style="margin-top:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <input id="cp_search" type="text" placeholder="Lọc nhanh (server filter)" style="flex:1; min-width:200px;" />
-          <button id="cp_clear_filter" class="btn btn-outline-secondary" type="button" title="Xoá filter & tải tất cả" style="padding:6px 10px; line-height:1;">⟳</button>
-          <select id="cp_limit" class="form-select" style="width:100px;">
-            <option value="20">20</option>
-            <option value="50" selected>50</option>
-            <option value="100">100</option>
-          </select>
-          <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">
-            <button id="cp_prev" class="btn btn-outline-secondary" disabled>«</button>
-            <span id="cp_page_info" class="hint">Trang 1</span>
-            <input id="cp_page_jump" type="number" min="1" class="form-control" style="width:72px; padding:4px 6px; font-size:13px;" placeholder="#" title="Nhập số trang & Enter" />
-            <button id="cp_next" class="btn btn-outline-secondary" disabled>»</button>
+        <div id="spellOverrideFormWrap" style="display:none; border:1px solid var(--border); padding:10px 12px; border-radius:8px; margin-bottom:10px;">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+            <div>
+              <label style="font-size:12px; color:#6b7280;">Token (gõ sai)</label>
+              <input id="so_token" type="text" placeholder="vd: thucc" />
+            </div>
+            <div>
+              <label style="font-size:12px; color:#6b7280;">Override (đúng)</label>
+              <input id="so_override" type="text" placeholder="vd: thức" />
+            </div>
+            <div>
+              <label style="font-size:12px; color:#6b7280;">Priority</label>
+              <input id="so_priority" type="number" value="1" />
+            </div>
+            <div>
+              <label style="font-size:12px; color:#6b7280;">Type</label>
+              <select id="so_type" style="width:100%; padding:6px 8px; border:1px solid var(--border); border-radius:8px;">
+                <option value="replace">replace</option>
+                <option value="protect">protect</option>
+                <option value="block">block</option>
+                <option value="expand">expand</option>
+                <option value="alias">alias</option>
+              </select>
+            </div>
+            <div style="display:flex; align-items:flex-end; gap:10px;">
+              <div style="display:flex; align-items:center; gap:6px; padding-top:18px;">
+                <input id="so_enabled" type="checkbox" checked /> <label for="so_enabled" style="margin:0; font-size:13px;">Enabled</label>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:8px;">
+            <label style="font-size:12px; color:#6b7280;">Notes</label>
+            <textarea id="so_notes" rows="2" style="width:100%; resize:vertical; padding:6px 8px; border:1px solid var(--border); border-radius:8px;"></textarea>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <button id="so_save" class="btn btn-primary" style="min-width:120px;">Lưu</button>
+            <button id="so_cancel" class="btn btn-outline-secondary" style="display:none;">Hủy</button>
           </div>
         </div>
-        <div id="cp_list" style="margin-top:6px; border:1px solid #e5e5e5; border-radius:6px; padding:8px;"></div>
+        <div id="spellOverrideFilterBar" style="display:none; margin-bottom:8px; gap:8px; align-items:center; flex-wrap:wrap;">
+          <input id="so_search" type="text" placeholder="Lọc nhanh token/override" style="flex:1; min-width:180px;" />
+          <label style="font-size:12px; display:flex; gap:4px; align-items:center; margin:0;"><input type="checkbox" id="so_show_disabled" /> Hiện cả disabled</label>
+        </div>
+        <div id="spellOverrideList" style="display:none; max-height:520px; overflow:auto; border:1px solid #e5e5e5; border-radius:6px; padding:6px 6px 4px;"></div>
+        <div id="customPhrasesWrap">
+          <h3 id="cp_header" style="display:flex; align-items:center; gap:8px;">Custom Phrases</h3>
+          <div class="row" id="cp_main_row" style="gap:12px; flex-wrap: wrap; align-items:flex-end;">
+            <div style="flex:1 1 200px;">
+              <label style="display:block; font-size:12px; color:#6b7280;">Display (tuỳ chọn)</label>
+              <input id="cp_display" type="text" placeholder="Hiện thị đẹp (nếu trống dùng Phrase)" />
+            </div>
+            <div style="width:120px;">
+              <label style="display:block; font-size:12px; color:#6b7280;">Priority</label>
+              <input id="cp_priority" type="number" value="5"  class="form-control"/>
+            </div>
+            <div style="flex:1 1 100%; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <button id="cp_add" class="btn btn-primary" style="min-width:130px;">Thêm/Update</button>
+              <button id="cp_cancel" class="btn btn-outline-secondary" style="display:none;">Hủy</button>
+              <button id="cp_refresh" class="btn btn-outline-secondary" title="Tải lại" style="padding:6px 12px;">↻</button>
+              <button id="cp_import" class="btn btn-outline-secondary" style="white-space:nowrap;">Import (.txt)</button>
+              <button id="cp_import_delete" class="btn btn-outline-danger" style="white-space:nowrap;">Import Xoá (.txt)</button>
+              <input id="cp_file" type="file" accept=".txt" style="display:none;" />
+              <input id="cp_delete_file" type="file" accept=".txt" style="display:none;" />
+            </div>
+          </div>
+          <div id="cp_filter_row" style="margin-top:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <input id="cp_search" type="text" placeholder="Lọc nhanh (server filter)" style="flex:1; min-width:200px;" />
+            <button id="cp_clear_filter" class="btn btn-outline-secondary" type="button" title="Xoá filter & tải tất cả" style="padding:6px 10px; line-height:1;">⟳</button>
+            <select id="cp_limit" class="form-select" style="width:100px;">
+              <option value="20">20</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+            </select>
+            <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">
+              <button id="cp_prev" class="btn btn-outline-secondary" disabled>«</button>
+              <span id="cp_page_info" class="hint">Trang 1</span>
+              <input id="cp_page_jump" type="number" min="1" class="form-control" style="width:72px; padding:4px 6px; font-size:13px;" placeholder="#" title="Nhập số trang & Enter" />
+              <button id="cp_next" class="btn btn-outline-secondary" disabled>»</button>
+            </div>
+          </div>
+          <div id="cp_list" style="margin-top:6px; border:1px solid #e5e5e5; border-radius:6px; padding:8px;"></div>
+        </div>
       </div>
     </div>
 
@@ -356,6 +415,7 @@
   const autoTrackClick = document.getElementById('autoTrackClick');
   const btnRebuildVectors = document.getElementById('btnRebuildVectors');
   const btnRebuildDict = document.getElementById('btnRebuildDict');
+  const btnSearchNow = document.getElementById('btnSearchNow');
   const btnStats1d = document.getElementById('btnStats1d');
   const latencyInfo = document.getElementById('latencyInfo');
   // Removed cp_phrase: display is authoritative
@@ -391,6 +451,223 @@
   const importDelClose = document.getElementById('importDelClose');
   const importDelOk = document.getElementById('importDelOk');
   const importDelBack = document.getElementById('importDelBack');
+
+  // Spell override admin elements
+  const tabCustomPhrases = document.getElementById('tabCustomPhrases');
+  const tabSpellOverrides = document.getElementById('tabSpellOverrides');
+  const so_reload = document.getElementById('so_reload');
+  const so_new = document.getElementById('so_new');
+  const so_token = document.getElementById('so_token');
+  const so_override = document.getElementById('so_override');
+  const so_priority = document.getElementById('so_priority');
+  const so_type = document.getElementById('so_type');
+  const so_enabled = document.getElementById('so_enabled');
+  const so_notes = document.getElementById('so_notes');
+  const so_save = document.getElementById('so_save');
+  const so_cancel = document.getElementById('so_cancel');
+  const so_search = document.getElementById('so_search');
+  const so_show_disabled = document.getElementById('so_show_disabled');
+  const so_list = document.getElementById('spellOverrideList');
+  const so_form_wrap = document.getElementById('spellOverrideFormWrap');
+  const so_actions = document.getElementById('spellOverrideActions');
+  const so_filter_bar = document.getElementById('spellOverrideFilterBar');
+  const cp_header = document.getElementById('cp_header');
+
+  let soEditingToken = null;
+  let soCache = [];
+  // Spell correction state (used to highlight using corrected query when two-pass spell correction applied)
+  let lastCorrectedQuery = null;
+  let lastSpellChanged = false;
+
+  function switchAdminTab(tab) {
+    const isSO = tab === 'spell';
+    // Buttons styling
+    if (tabCustomPhrases) {
+      tabCustomPhrases.classList.toggle('btn-primary', !isSO);
+      tabCustomPhrases.classList.toggle('btn-outline-secondary', isSO);
+    }
+    if (tabSpellOverrides) {
+      tabSpellOverrides.classList.toggle('btn-primary', isSO);
+      tabSpellOverrides.classList.toggle('btn-outline-secondary', !isSO);
+    }
+    // Simplified: wrap all custom phrase UI in #customPhrasesWrap
+    const cpWrap = document.getElementById('customPhrasesWrap');
+    if (cpWrap) cpWrap.style.display = isSO ? 'none' : 'block';
+    // Spell override controls
+    so_actions.style.display = isSO ? 'flex' : 'none';
+    so_form_wrap.style.display = (isSO && soEditingToken) ? 'block' : 'none';
+    so_filter_bar.style.display = isSO ? 'flex' : 'none';
+    so_list.style.display = isSO ? 'block' : 'none';
+    if (!isSO && cp_list && !cp_list.innerHTML.trim()) { try { loadCustomPhrases(); } catch(_) {} }
+    if (isSO) {
+      loadSpellOverrides().catch(e => showToast('Lỗi tải overrides: ' + String(e), { variant:'danger', title:'Lỗi'}));
+    } else {
+      // ensure custom phrases visible
+      loadCustomPhrases().catch(()=>{});
+    }
+  }
+
+  tabCustomPhrases?.addEventListener('click', () => switchAdminTab('custom'));
+  tabSpellOverrides?.addEventListener('click', () => switchAdminTab('spell'));
+
+  async function fetchSpellOverrides(showDisabled) {
+    const base = apiBase.value.replace(/\/$/, '');
+    const params = new URLSearchParams();
+    if (!showDisabled) params.set('enabled', '1');
+    const url = `${base}/api/search/spell_overrides?${params.toString()}`;
+  const headers = {};
+    const tk = token.value.trim();
+    if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+    const res = await fetch(url, { headers });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const js = await res.json();
+    return js?.data || [];
+  }
+
+  function renderSpellOverrides() {
+    const filter = (so_search?.value || '').trim().toLowerCase();
+    so_list.innerHTML = '';
+    const rows = soCache.filter(r => {
+      if (!filter) return true;
+      return String(r.token).includes(filter) || String(r.override).includes(filter) || String(r.notes||'').toLowerCase().includes(filter);
+    });
+    if (!rows.length) { so_list.innerHTML = '<div class="hint">Chưa có override</div>'; return; }
+    rows.forEach(r => {
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.justifyContent = 'space-between';
+      row.style.borderBottom = '1px solid #eee';
+      row.style.padding = '6px 6px';
+      const typeBadgeColor = ({
+        replace: '#6366f1',
+        protect: '#059669',
+        block: '#dc2626',
+        expand: '#d97706',
+        alias: '#7c3aed'
+      })[r.type || 'replace'];
+      row.innerHTML = `<div style="flex:1; min-width:0;">
+          <strong>${escapeHtml(r.token)}</strong> → <span style="color:var(--purple-pain); font-weight:600;">${escapeHtml(r.override)}</span>
+          <span style="display:inline-block; margin-left:4px; padding:2px 6px; font-size:11px; border-radius:999px; background:${typeBadgeColor||'#6366f1'}; color:#fff; text-transform:uppercase; letter-spacing:.5px;">${escapeHtml(r.type || 'replace')}</span>
+          <div class="hint" style="margin-top:2px;">prio ${r.priority} • ${r.enabled? 'enabled':'disabled'} ${r.notes? ('• '+escapeHtml(r.notes)) : ''}</div>
+        </div>`;
+      const act = document.createElement('div');
+      act.style.display = 'flex';
+      act.style.gap = '6px';
+      const editBtn = document.createElement('button'); editBtn.textContent = 'Sửa'; editBtn.className='btn btn-sm btn-outline-secondary';
+      editBtn.addEventListener('click', () => {
+        soEditingToken = r.token;
+        so_token.value = r.token;
+        so_override.value = r.override;
+        so_priority.value = r.priority;
+        if (so_type) so_type.value = r.type || 'replace';
+        so_enabled.checked = !!r.enabled;
+        so_notes.value = r.notes || '';
+        so_form_wrap.style.display = 'block';
+        so_cancel.style.display = 'inline-block';
+      });
+      const enBtn = document.createElement('button'); enBtn.textContent = r.enabled? 'Disable':'Enable'; enBtn.className='btn btn-sm btn-outline-secondary';
+      enBtn.addEventListener('click', () => toggleEnableOverride(r));
+      const delBtn = document.createElement('button'); delBtn.textContent = 'Xóa'; delBtn.className='btn btn-sm btn-outline-danger';
+      delBtn.addEventListener('click', () => deleteOverride(r));
+      act.appendChild(editBtn); act.appendChild(enBtn); act.appendChild(delBtn);
+      row.appendChild(act);
+      so_list.appendChild(row);
+    });
+  }
+
+  async function loadSpellOverrides() {
+    so_list.innerHTML = '<div class="hint">Loading...</div>';
+    soCache = await fetchSpellOverrides(!!so_show_disabled?.checked);
+    renderSpellOverrides();
+  }
+
+  async function saveSpellOverride() {
+    const tokenVal = (so_token.value || '').trim();
+    const overrideVal = (so_override.value || '').trim();
+    if (!tokenVal) return showToast('Nhập token', { variant:'warning', title:'Thiếu'});
+    if (!overrideVal) return showToast('Nhập override', { variant:'warning', title:'Thiếu'});
+    const base = apiBase.value.replace(/\/$/, '');
+    const url = `${base}/api/search/spell_overrides`;
+  const headers = { 'Content-Type':'application/json' };
+    const tk = token.value.trim(); if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+    const body = { token: tokenVal, override: overrideVal, type: so_type ? so_type.value : 'replace', enabled: !!so_enabled.checked, priority: parseFloat(so_priority.value)||1, notes: (so_notes.value||'').trim() };
+    try {
+      const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const js = await res.json();
+      showToast(js?.message || 'Đã lưu', { variant:'success', title:'Spell Override'});
+      soEditingToken = null;
+      so_token.value = '';
+      so_override.value = '';
+      so_priority.value = '1';
+      if (so_type) so_type.value = 'replace';
+      so_enabled.checked = true;
+      so_notes.value = '';
+      so_cancel.style.display = 'none';
+      so_form_wrap.style.display = 'none';
+      await loadSpellOverrides();
+    } catch (e) {
+      showToast('Lỗi lưu: ' + String(e), { variant:'danger', title:'Lỗi'});
+    }
+  }
+
+  async function toggleEnableOverride(row) {
+    const base = apiBase.value.replace(/\/$/, '');
+  const headers = {};
+    const tk = token.value.trim(); if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+    const path = `/api/search/spell_overrides/${encodeURIComponent(row.token)}/${row.enabled? 'disable':'enable'}`;
+    try {
+      const res = await fetch(base + path, { method: 'PATCH', headers });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      showToast(row.enabled? 'Đã disable':'Đã enable', { variant:'success', title:'Spell Override'});
+      await loadSpellOverrides();
+    } catch (e) { showToast('Lỗi: ' + String(e), { variant:'danger', title:'Lỗi'}); }
+  }
+
+  async function deleteOverride(row) {
+    if (!confirm(`Xóa override token "${row.token}"?`)) return;
+    const base = apiBase.value.replace(/\/$/, '');
+  const headers = { 'Content-Type':'application/json' };
+    const tk = token.value.trim(); if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+    try {
+      // body.id
+      let res = await fetch(`${base}/api/search/spell_overrides`, { method:'DELETE', headers, body: JSON.stringify({ id: row.token }) });
+      if (!res.ok) {
+        // fallback path
+        res = await fetch(`${base}/api/search/spell_overrides/${encodeURIComponent(row.token)}`, { method:'DELETE', headers });
+      }
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      showToast('Đã xoá', { variant:'success', title:'Spell Override'});
+      await loadSpellOverrides();
+    } catch (e) { showToast('Xóa lỗi: ' + String(e), { variant:'danger', title:'Lỗi'}); }
+  }
+
+  so_new?.addEventListener('click', () => {
+    soEditingToken = null;
+    so_token.value = '';
+    so_override.value = '';
+    so_priority.value = '1';
+    so_enabled.checked = true;
+    so_notes.value = '';
+    so_form_wrap.style.display = 'block';
+    so_cancel.style.display = 'none';
+  });
+  so_save?.addEventListener('click', saveSpellOverride);
+  so_cancel?.addEventListener('click', () => { soEditingToken = null; so_form_wrap.style.display='none'; });
+  so_reload?.addEventListener('click', async () => {
+    const base = apiBase.value.replace(/\/$/, '');
+  const headers = {};
+    const tk = token.value.trim(); if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+    try {
+      const res = await fetch(`${base}/api/search/spell_overrides/reload`, { method:'GET', headers });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      showToast('Reload cache OK', { variant:'success', title:'Spell Override'});
+      await loadSpellOverrides();
+    } catch (e) { showToast('Reload lỗi: ' + String(e), { variant:'danger', title:'Lỗi'}); }
+  });
+  let soSearchTimer; so_search?.addEventListener('input', () => { clearTimeout(soSearchTimer); soSearchTimer=setTimeout(renderSpellOverrides, 250); });
+  so_show_disabled?.addEventListener('change', () => loadSpellOverrides().catch(()=>{}));
 
   // SessionStorage flags (per session) to skip guide modals after user acknowledged
   const SS_IMPORT_ACK_KEY = 'cp_import_ack_v1';
@@ -771,6 +1048,19 @@
       lastSuggestLatency = res.headers.get('x-suggest-latency-ms');
       latencyInfo.textContent = lastSuggestLatency ? `Latency: ${lastSuggestLatency} ms` : '';
       const json = await res.json();
+      // Capture backend spell meta for highlight
+      try {
+        const ms = json?.meta?.spell;
+        if (ms && typeof ms === 'object') {
+          const orig = ms.original || '';
+          const corr = ms.corrected || '';
+          lastSpellChanged = !!ms.changed && !!corr && corr !== orig;
+          lastCorrectedQuery = lastSpellChanged ? corr : null;
+        } else {
+          lastSpellChanged = false;
+          lastCorrectedQuery = null;
+        }
+      } catch { lastSpellChanged = false; lastCorrectedQuery = null; }
       return json?.data || [];
     }
 
@@ -794,6 +1084,7 @@
         currentItemsCache = [];
         setList([]);
         list.style.display = 'none';
+        lastCorrectedQuery = null; lastSpellChanged = false;
         // Ẩn luôn kết quả cũ nếu user xoá sạch
         if (resultsWrap) {
           resultsWrap.style.display = 'none';
@@ -841,6 +1132,16 @@
     q.addEventListener('input', onInput);
     q.addEventListener('focus', onInput);
     q.addEventListener('blur', () => setTimeout(() => list.style.display = 'none', 150));
+    // Enter to search when dropdown không mở
+    q.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        // Nếu list đang hiển thị & có active item thì on keydown handler dưới sẽ xử lý
+        if (list.style.display !== 'block') {
+          e.preventDefault();
+          doSearch(1);
+        }
+      }
+    });
   apiBase.addEventListener('input', () => updateEndpoint());
 
     // Restore arrow key navigation & Enter selection
@@ -886,7 +1187,7 @@
       .trim();
     function renderHighlight(it) {
       // Bôi đậm từng token người dùng đã gõ xuất hiện trong cụm gợi ý (không phân biệt hoa/thường & dấu)
-      const queryRaw = q.value || '';
+      const queryRaw = (lastSpellChanged && lastCorrectedQuery) ? lastCorrectedQuery : (q.value || '');
       const phrase = String(it.full || it.text || '');
       if (!queryRaw.trim()) return escapeHtml(phrase);
 
@@ -981,7 +1282,7 @@
     }
 
     function updateEndpoint() {
-      const base = (apiBase.value || '').replace(/\/$/, '') || 'https://pepeapi-vv2pcyowoa-as.a.run.app';
+      const base = (apiBase.value || '').replace(/\/$/, '') || 'http://localhost:4200';
       const v = q.value || '';
       const qs = `?query=${encodeURIComponent(v)}`;
       endpointPreview.textContent = `GET ${base}/api/search/suggest_keywords${qs}`;
@@ -1076,6 +1377,25 @@
 
   btnRebuildVectors?.addEventListener('click', () => postNoBody('/api/search/rebuild_keyword_vectors').catch(e => showToast('Lỗi: ' + e, { variant:'danger', title:'Lỗi'})));
   btnRebuildDict?.addEventListener('click', () => postNoBody('/api/search/rebuild_dictionary').catch(e => showToast('Lỗi: ' + e, { variant:'danger', title:'Lỗi'})));
+  btnSearchNow?.addEventListener('click', async () => {
+    try {
+      const base = apiBase.value.replace(/\/$/, '');
+      const qVal = (q.value || '').trim();
+      if (!qVal) { showToast('Nhập từ khóa', { variant:'warning', title:'Thiếu'}); return; }
+  const headers = { 'Accept':'application/json' };
+      const tk = token.value.trim(); if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
+      const url = `${base}/api/search?query=${encodeURIComponent(qVal)}`;
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const js = await res.json();
+      // Hiển thị tóm tắt kết quả + nếu có corrected
+      const corrected = js.corrected && js.corrected !== qVal ? ` (đã sửa: ${js.corrected})` : '';
+      showToast(`Search OK${corrected}. KQ: ${Array.isArray(js.data)? js.data.length: 0}`, { variant:'success', title:'Search' });
+      console.log('[SEARCH]', js);
+    } catch (e) {
+      showToast('Lỗi search: ' + e, { variant:'danger', title:'Search'});
+    }
+  });
 
     btnStats1d?.addEventListener('click', async () => {
       try {
@@ -1325,14 +1645,11 @@
         queryEcho.textContent = `cho \u201C${query}\u201D`;
         renderResults(rows);
         resultsWrap.style.display = 'block';
-        // Điều kiện phân trang: nếu ít hơn limit thì ẩn nút Sau
         nextBtn.disabled = rows.length < limit;
         prevBtn.disabled = currentPage <= 1;
-
-        // Render Did you mean
         if (didYouMean && didYouMean.toLowerCase() !== query.toLowerCase()) {
           didYouMeanWrap.style.display = 'block';
-          didYouMeanWrap.innerHTML = `Gợi ý: Có phải bạn muốn tìm “<a id="dymLink" href="#">${escapeHtml(didYouMean)}</a>”?`;
+          didYouMeanWrap.innerHTML = `Gợi ý: Có phải bạn muốn tìm “<a id=\"dymLink\" href=\"#\">${escapeHtml(didYouMean)}</a>”?`;
           const link = document.getElementById('dymLink');
           link?.addEventListener('click', (e) => {
             e.preventDefault();
