@@ -165,11 +165,11 @@
     <div class="layout">
       <div class="main-col">
         <div class="row inputs-grid">
-          <input id="apiBase" class="form-control" type="text" placeholder="API base (vd: http://localhost:4200)" value="http://localhost:4200" />
+          <input id="apiBase" class="form-control" type="text" placeholder="API base (vd: pepeapi-vv2pcyowoa-as.a.run.app)" value="pepeapi-vv2pcyowoa-as.a.run.app" />
           <input id="token" class="form-control" type="text" placeholder="Authorization token (vd: Pepeiscool hoặc Bearer ...)" value="Pepeiscool" />
         </div>
         <div style="height: 8px"></div>
-        <div class="hint">Endpoint: <span id="endpointPreview">GET http://localhost:4200/api/search/suggest_keywords?query=...</span></div>
+        <div class="hint">Endpoint: <span id="endpointPreview">GET pepeapi-vv2pcyowoa-as.a.run.app/api/search/suggest_keywords?query=...</span></div>
         <div class="row query-grid" style="margin-top:6px;">
           <div class="q-wrap">
             <div style="display:flex; gap:6px; width:100%; align-items:center;">
@@ -1394,7 +1394,7 @@
     }
 
     function updateEndpoint() {
-      const base = (apiBase.value || '').replace(/\/$/, '') || 'http://localhost:4200';
+      const base = (apiBase.value || '').replace(/\/$/, '') || 'pepeapi-vv2pcyowoa-as.a.run.app';
       const v = q.value || '';
       const qs = `?query=${encodeURIComponent(v)}`;
       endpointPreview.textContent = `GET ${base}/api/search/suggest_keywords${qs}`;
