@@ -1,1 +1,199 @@
-readme
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>PEPE README Viewer</title>
+	<style>
+		:root {
+			--bg:#0f1115; --text:#e6e9ef; --code:#282c34; --border:#2a2f3a; --accent:#b48ef7; --link:#8ab4ff;
+			--panel:#1a1d23; --shadow:0 4px 18px -6px rgba(0,0,0,.5);
+		}
+		body { margin:0; font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--text); line-height:1.55; }
+		.wrap { max-width:1140px; margin:0 auto; padding:34px 24px 80px; }
+		h1,h2,h3,h4,h5 { line-height:1.25; font-weight:600; }
+		h1 { font-size: clamp(1.9rem, 2.4vw, 2.4rem); margin-top:0; }
+		h2 { margin-top:3.2em; padding-top:.6em; border-top:1px solid var(--border); font-size:1.4rem; }
+		h3 { margin-top:2.2em; font-size:1.15rem; }
+		p,li { font-size:15px; }
+		pre { background:var(--code); padding:14px 16px; border-radius:10px; overflow:auto; font-size:13px; line-height:1.4; }
+		code { background:var(--code); padding:2px 5px; border-radius:6px; font-size:13px; }
+		a { color:var(--link); text-decoration:none; }
+		a:hover { text-decoration:underline; }
+		table { width:100%; border-collapse:collapse; margin:18px 0 28px; font-size:13px; }
+		th,td { border:1px solid var(--border); padding:6px 9px; text-align:left; vertical-align:top; }
+		th { background:#20252e; font-weight:600; }
+		blockquote { margin:18px 0; padding:10px 14px; background:#1d222b; border-left:4px solid var(--accent); border-radius:4px; }
+		hr { border:none; border-top:1px solid var(--border); margin:50px 0; }
+		.topbar { position:sticky; top:0; backdrop-filter: blur(8px); background:rgba(15,17,21,.82); border-bottom:1px solid var(--border); z-index:40; padding:10px 18px; display:flex; gap:14px; align-items:center; }
+		.topbar h1 { font-size:18px; margin:0; font-weight:600; letter-spacing:.5px; }
+		.grow { flex:1; }
+		button { background:#222832; color:var(--text); border:1px solid var(--border); padding:8px 14px; border-radius:8px; cursor:pointer; font-size:13px; display:inline-flex; gap:6px; align-items:center; }
+		button:hover { background:#2b323d; }
+		.status { font-size:12px; opacity:.7; }
+		.toc { background:var(--panel); padding:14px 16px 18px; border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); position:sticky; top:62px; max-height: calc(100vh - 90px); overflow:auto; }
+		.layout { display:flex; gap:34px; align-items:flex-start; }
+		.doc { flex:1; min-width:0; }
+		.toc a { display:block; padding:4px 0; font-size:13px; color:#cdd2dc; text-decoration:none; }
+		.toc a:hover { color:#fff; }
+		.toc h4 { margin:4px 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; opacity:.65; }
+		.loading { padding:60px 20px; text-align:center; font-size:14px; opacity:.8; }
+		.error { padding:16px 18px; background:#3b1d24; border:1px solid #7a2f3e; border-radius:10px; color:#ffb4c2; margin:24px 0; }
+		.badge { background:#262d38; border:1px solid var(--border); padding:2px 8px 3px; border-radius:999px; font-size:11px; letter-spacing:.5px; text-transform:uppercase; }
+		.light { --bg:#f7f9fc; --text:#1e2430; --border:#d2d9e3; --panel:#ffffff; --code:#1e2430; --link:#3451d1; }
+		.light th { background:#eef2f8; }
+		.light blockquote { background:#f1f5fb; border-left-color:#6a42b9; }
+		.light pre, .light code { background:#272c33; color:#f5f7fa; }
+		.switcher { font-size:12px; }
+		.anchor-link { opacity:0; margin-left:6px; font-size:12px; text-decoration:none; }
+		h2:hover .anchor-link, h3:hover .anchor-link, h1:hover .anchor-link { opacity:1; }
+		.search-box { position:relative; }
+		.search-box input { background:#1d232c; border:1px solid var(--border); padding:8px 10px; border-radius:8px; font-size:13px; color:var(--text); width:220px; }
+		.light .search-box input { background:#fff; }
+		mark { background:#514075; color:#fff; padding:1px 3px; border-radius:4px; }
+		@media (max-width:1080px){ .layout { flex-direction:column; } .toc { position:relative; top:0; max-height:none; } }
+	</style>
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+	<div class="topbar">
+		<h1>PEPE README</h1>
+		<div class="search-box"><input id="searchInput" placeholder="Tìm trong trang..." /></div>
+		<span id="loadStatus" class="status">Đang tải...</span>
+		<div class="grow"></div>
+		<button id="btnMode" title="Chuyển theme">🌓 <span class="switcher" id="modeLabel">Dark</span></button>
+		<button id="btnScrollTop" title="Lên đầu">⬆ Top</button>
+	</div>
+	<div class="wrap">
+		<div class="layout">
+			<div class="doc" id="docRoot"><div class="loading">Loading README.md ...</div></div>
+			<aside class="toc" id="toc"><h4>Mục lục</h4><div id="tocLinks"></div></aside>
+		</div>
+	</div>
+	<script>
+		const state = { raw:'', filtered:'', highlights:[] };
+		const LS_MODE_KEY = 'readme_viewer_mode_v1';
+		const docRoot = document.getElementById('docRoot');
+		const loadStatus = document.getElementById('loadStatus');
+		const tocLinks = document.getElementById('tocLinks');
+		const btnMode = document.getElementById('btnMode');
+		const modeLabel = document.getElementById('modeLabel');
+		const btnScrollTop = document.getElementById('btnScrollTop');
+		const searchInput = document.getElementById('searchInput');
+
+		function applyMode(){
+			const m = localStorage.getItem(LS_MODE_KEY)||'dark';
+			document.body.classList.toggle('light', m==='light');
+			modeLabel.textContent = m==='light'? 'Light':'Dark';
+		}
+		btnMode.addEventListener('click', () => {
+			const cur = localStorage.getItem(LS_MODE_KEY)||'dark';
+			localStorage.setItem(LS_MODE_KEY, cur==='dark'?'light':'dark');
+			applyMode();
+		});
+		btnScrollTop.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+		applyMode();
+
+		async function loadReadme(){
+			const isFileProto = location.protocol === 'file:';
+			try {
+				const res = await fetch('README.md',{cache:'no-cache'});
+				if(!res.ok) throw new Error('HTTP '+res.status);
+				state.raw = await res.text();
+				renderMarkdown(state.raw);
+				loadStatus.textContent = 'Loaded';
+			} catch(e){
+				const msg = 'Không tải được README.md: '+e.message + (isFileProto ? ' (Trình duyệt thường chặn fetch file://. Dùng nút chọn file bên dưới.)' : '');
+				loadStatus.textContent = 'Lỗi';
+				const fallback = document.createElement('div');
+				fallback.innerHTML = `
+					<div class="error">
+						<p>${msg}</p>
+						${isFileProto ? '<p><strong>Fallback:</strong> Chọn thủ công file README.md trong thư mục dự án.</p>' : ''}
+						${isFileProto ? '<input type="file" id="filePicker" accept=".md,text/markdown" style="margin-top:8px;" />' : ''}
+						<button id="retryBtn" style="margin-top:12px;">Thử lại fetch</button>
+					</div>`;
+				docRoot.innerHTML = '';
+				docRoot.appendChild(fallback);
+				const retryBtn = document.getElementById('retryBtn');
+				retryBtn?.addEventListener('click', () => { loadStatus.textContent='Đang tải...'; loadReadme(); });
+				if(isFileProto){
+					const fp = document.getElementById('filePicker');
+					fp?.addEventListener('change', (e)=>{
+						const file = e.target.files && e.target.files[0];
+						if(!file) return;
+						const reader = new FileReader();
+						reader.onload = (re) => {
+							state.raw = re.target.result;
+							renderMarkdown(state.raw);
+							loadStatus.textContent = 'Loaded (local file)';
+						};
+						reader.onerror = () => { loadStatus.textContent = 'Đọc file lỗi'; };
+						reader.readAsText(file, 'utf-8');
+					});
+				}
+			}
+		}
+
+		function slugify(text){
+			return text.toLowerCase().replace(/[^a-z0-9\p{L}\s-]/gu,'').trim().replace(/\s+/g,'-').slice(0,80);
+		}
+
+		function buildTOC(){
+			tocLinks.innerHTML='';
+			const hs = docRoot.querySelectorAll('h1,h2,h3');
+			hs.forEach(h => {
+				if(!h.id){ h.id = slugify(h.textContent); }
+				const a = document.createElement('a');
+				a.href = '#'+h.id; a.textContent = h.textContent.replace(/^[0-9.\s]+/,'');
+				a.style.marginLeft = h.tagName==='H3'? '12px': (h.tagName==='H2'? '4px':'0');
+				tocLinks.appendChild(a);
+			});
+		}
+
+		function addAnchors(){
+			const hs = docRoot.querySelectorAll('h1,h2,h3');
+			hs.forEach(h => {
+				if(!h.id) h.id = slugify(h.textContent);
+				const a = document.createElement('a');
+				a.href = '#'+h.id; a.textContent = '#'; a.className='anchor-link';
+				h.appendChild(a);
+			});
+		}
+
+		function highlight(term){
+			// remove existing
+			docRoot.querySelectorAll('mark').forEach(m => {
+				const parent = m.parentNode; parent.replaceChild(document.createTextNode(m.textContent), m); parent.normalize();
+			});
+			if(!term){ return; }
+			const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+			walk(docRoot);
+			function walk(node){
+				if(node.nodeType===3){
+					const txt = node.textContent; if(!re.test(txt)) return; re.lastIndex=0;
+					const frag = document.createDocumentFragment(); let last=0; let m;
+					while((m=re.exec(txt))){
+						frag.appendChild(document.createTextNode(txt.slice(last,m.index)));
+						const mark=document.createElement('mark'); mark.textContent=m[0]; frag.appendChild(mark); last = m.index + m[0].length;
+					}
+						frag.appendChild(document.createTextNode(txt.slice(last)));
+					node.parentNode.replaceChild(frag,node);
+				} else if(node.nodeType===1 && !['SCRIPT','STYLE'].includes(node.tagName)){ Array.from(node.childNodes).forEach(walk); }
+			}
+		}
+
+		let searchTimer;
+		searchInput.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer=setTimeout(()=>highlight(searchInput.value.trim()), 260); });
+
+		function renderMarkdown(src){
+			const html = marked.parse(src, { mangle:false, headerIds:false });
+			docRoot.innerHTML = html;
+			addAnchors();
+			buildTOC();
+		}
+
+		loadReadme();
+	</script>
+</body>
+</html>

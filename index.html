@@ -219,11 +219,23 @@
           <div style="display:flex; gap:6px;">
             <button id="tabCustomPhrases" class="btn btn-sm btn-primary" type="button">Custom Phrases</button>
             <button id="tabSpellOverrides" class="btn btn-sm btn-outline-secondary" type="button">Spell Overrides</button>
+            <button id="btnProtectSet" class="btn btn-sm btn-outline-secondary" type="button" title="Xem danh sách protect">Protect Set</button>
           </div>
           <div id="spellOverrideActions" style="display:none; gap:6px; margin-left:auto;">
             <button id="so_reload" class="btn btn-sm btn-outline-secondary" title="Reload override cache">Reload Cache</button>
             <button id="so_new" class="btn btn-sm btn-primary" title="Thêm override">Thêm / Update</button>
           </div>
+        </div>
+        <div id="protectSetPanel" style="display:none; border:1px solid var(--border); padding:10px 12px; border-radius:8px; margin-bottom:10px; max-height:300px; overflow:auto; background:#fff;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <strong style="font-size:14px;">Protect Set <span id="protectSetStats" style="font-weight:400; color:#6b7280;"></span></strong>
+            <button type="button" id="protectSetClose" class="btn btn-sm btn-outline-secondary" style="padding:4px 10px;">Đóng</button>
+          </div>
+          <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+            <input id="protectSetFilter" type="text" placeholder="Lọc nhanh" style="flex:1; min-width:160px; padding:6px 8px; border:1px solid var(--border); border-radius:8px;" />
+            <button id="protectSetRefresh" class="btn btn-sm btn-outline-secondary" type="button" title="Refresh" style="padding:6px 10px;">↻</button>
+          </div>
+          <div id="protectSetList" style="margin-top:8px; display:grid; grid-template-columns: repeat(auto-fill,minmax(140px,1fr)); gap:6px;"></div>
         </div>
         <div id="spellOverrideFormWrap" style="display:none; border:1px solid var(--border); padding:10px 12px; border-radius:8px; margin-bottom:10px;">
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
@@ -244,9 +256,6 @@
               <select id="so_type" style="width:100%; padding:6px 8px; border:1px solid var(--border); border-radius:8px;">
                 <option value="replace">replace</option>
                 <option value="protect">protect</option>
-                <option value="block">block</option>
-                <option value="expand">expand</option>
-                <option value="alias">alias</option>
               </select>
             </div>
             <div style="display:flex; align-items:flex-end; gap:10px;">
@@ -318,32 +327,67 @@
           <button class="close" id="howClose" aria-label="Đóng">×</button>
         </header>
         <div class="content">
-          <p>Trang này kết nối tới API <code>GET /api/search/suggest_keywords</code> để gợi ý từ khóa theo thời gian thực. Hệ thống trộn kết quả từ nhiều nguồn và xếp hạng thông minh để hiển thị danh sách bạn thấy bên dưới ô tìm kiếm.</p>
-          <h4>Nguồn gợi ý chính</h4>
-          <ul>
-            <li><strong>Prefix</strong>: Hoàn tất token đang gõ theo tiền tố.</li>
-            <li><strong>Neighbor (PPMI)</strong>: Từ/cụm từ có quan hệ thống kê cao với token trước đó.</li>
-            <li><strong>Next token</strong>: Dự đoán từ tiếp theo theo ngữ cảnh 1–2 bước.</li>
-            <li><strong>Phrase</strong>: Mở rộng thành cụm nhiều token dựa trên chuỗi next-token.</li>
-            <li><strong>Phrase dictionary</strong>: Cụm mined sẵn (n-gram) vượt ngưỡng PMI.</li>
-            <li><strong>Custom</strong>: Cụm do Admin quản trị (ưu tiên cao).</li>
-            <li><strong>Embedding</strong> (tuỳ chọn): Hàng xóm nghĩa dựa trên embedding.</li>
+          <p><strong>Suggest Keywords</strong> lấy input bạn gõ và trả về danh sách gợi ý được xếp hạng theo độ liên quan + ưu tiên business. Mọi tối ưu đều tuân thủ nguyên tắc <em>zero-diff</em> (bật/tắt flag an toàn không làm đổi thứ tự kết quả cuối).</p>
+          <h4>1. Chuẩn hoá & Cache</h4>
+          <ul style="margin-bottom:10px;">
+            <li>Tách <code>preserve</code> (giữ dấu) & <code>fold</code> (bỏ dấu) để match tiếng Việt không mất dấu hiển thị.</li>
+            <li>Tạo cache key: <code>suggest:v&lt;customVersion&gt;:&lt;normalized&gt;:space=&lt;0|1&gt;</code>.</li>
+            <li>Nếu hit Redis (≈20s TTL) → trả ngay kèm header thời gian.</li>
           </ul>
-          <h4>Hiệu năng & Cache</h4>
-          <p>Truy vấn được chuẩn hoá, chạy song song các nhánh chính và cache trong Redis ~20s theo <code>query</code> + cờ có/không khoảng trắng ở cuối. Header <code>x-suggest-latency-ms</code> hiển thị độ trễ xử lý.</p>
-          <h4>Học online</h4>
-          <p>Nếu bật, hệ thống thu thập <em>click</em> trên gợi ý và truy vấn tìm kiếm để cải thiện gợi ý theo thời gian.</p>
-          <h4>Admin: Custom Phrases</h4>
-          <p>Bạn có thể thêm/sửa/xoá cụm ưu tiên ở khu vực Admin (nút “Hiện Admin”). Cụm này có thể được <em>pin</em> ở đầu danh sách.</p>
-          <h4>Auth</h4>
-          <p>Các API yêu cầu header <code>Authorization: Bearer &lt;token&gt;</code>. Ô token bên trên chấp nhận cả dạng thuần lẫn tiền tố <code>Bearer</code> và sẽ tự chuẩn hoá khi gửi.</p>
-          <h4>Tham khảo</h4>
-          <p>Nội dung chi tiết hơn nằm trong README đính kèm. Phần tóm tắt ở đây được cô đọng cho mục đích dùng nhanh.</p>
+          <h4>2. Pipeline (Cache miss)</h4>
+          <ol style="margin-bottom:10px; padding-left:20px;">
+            <li><strong>Custom phase</strong>: Narrowing nhanh bằng index (ký tự / tiền tố). Có augmentation khi candidate ít.</li>
+            <li><strong>Early exit</strong>: Nếu đủ số lượng & cấu hình cho phép (<code>CUSTOM_EARLY_THRESHOLD</code>, mode <code>custom-first</code>).</li>
+            <li><strong>Space cuối?</strong> Nếu query kết thúc bằng khoảng trắng ⇒ kích hoạt <em>phrase dict</em> + <em>next-token</em> + branch expansion (giới hạn bởi time budget).</li>
+            <li><strong>Chưa space cuối</strong>: Dự đoán phần còn thiếu của token cuối (fallback phrase).</li>
+            <li><strong>Embedding (tuỳ chọn)</strong>: Thêm hàng xóm ngữ nghĩa nếu bật.</li>
+            <li><strong>Merge → Dedupe → Score → Sort → Trim</strong>.</li>
+          </ol>
+          <h4>3. Scoring Rút gọn</h4>
+          <pre><code>score = normalizer(raw) * weight(type) + priorityBoost(optional)</code></pre>
+          <ul style="margin-bottom:10px;">
+            <li>Custom có thể thêm <code>priority</code>.</li>
+            <li>Match chính xác đầu câu và độ dài hợp lý được bonus nhẹ.</li>
+          </ul>
+          <h4>4. Nguồn Kết Hợp</h4>
+          <ul style="columns:2; -webkit-columns:2; column-gap:26px;">
+            <li><strong>Custom</strong>: Cụm do Admin thêm.</li>
+            <li><strong>Prefix</strong>: Hoàn tất token hiện tại.</li>
+            <li><strong>Phrase Dict</strong>: Cụm PMI cao được mining offline.</li>
+            <li><strong>Next-token</strong>: Bigram / trigram dự đoán token kế tiếp.</li>
+            <li><strong>Phrase Expansion</strong>: Nối chuỗi next-token thành cụm dài (có giới hạn thời gian + độ sâu).</li>
+            <li><strong>Neighbor / Related</strong>: Đồng xuất hiện mạnh.</li>
+            <li><strong>Embedding</strong> (optional): Tương tự ngữ nghĩa.</li>
+          </ul>
+          <h4>5. Hiệu năng</h4>
+          <ul style="margin-bottom:10px;">
+            <li>Prefix & length narrowing giảm candidate ngay đầu.</li>
+            <li>Map reuse + LRU next-token giảm GC & truy vấn lặp.</li>
+            <li>Time budget (<code>PHRASE_BUILD_TIME_BUDGET_MS</code>) bảo vệ p95.</li>
+            <li>Early exit giữ latency thấp mà không mất tính ổn định kết quả.</li>
+          </ul>
+          <h4>6. Beautify & Spell (ngoài pipeline này)</h4>
+          <p>Nếu tích hợp endpoint <code>/api/spell</code>, hệ thống sửa & làm đẹp dấu trước/hoặc song song suggest. Dấu người dùng đúng sẽ được giữ, sai chuẩn sẽ khôi phục bằng snapshot có trường <code>originalForm</code>.</p>
+          <h4>7. Header quan trọng (khi bật timing)</h4>
+          <ul style="margin-bottom:10px;">
+            <li><code>x-suggest-latency-ms</code>: Tổng thời gian.</li>
+            <li><code>x-early-exit-stage</code>: Giai đoạn dừng (nếu có).</li>
+            <li><code>x-prof-custom-candidates</code>: Số candidate thô custom.</li>
+          </ul>
+          <h4>8. Admin</h4>
+          <ul style="margin-bottom:10px;">
+            <li>Thêm / import / xoá custom phrases.</li>
+            <li>Quản lý spell overrides (protect / replace).</li>
+            <li>Xem <em>Protect Set</em> để biết token bị chặn sửa.</li>
+          </ul>
+          <h4>9. Auth</h4>
+          <p>Yêu cầu <code>Authorization: Bearer &lt;token&gt;</code>. Ô token tự xử lý nếu bạn không gõ "Bearer".</p>
+          <h4>10. Tham khảo thêm</h4>
+          <p>Xem đầy đủ kiến trúc, config, flow & playbook trong <a href="readme.html" target="_blank" rel="noopener">README (viewer)</a> hoặc bản tóm tắt kỹ thuật ở <code>HOW_IT_WORKS.md</code>.</p>
           <hr class="my-3"/>
-          <div class="d-flex flex-wrap gap-2">
-            <a href="README_suggest_keywords_full.md" class="btn btn-sm btn-outline-primary" download>Tải Full README v2 (.md)</a>
-            <a href="readme.html?file=full" class="btn btn-sm btn-link" target="_blank" rel="noopener">Xem Full README</a>
-            <a href="readme.html?file=overview" class="btn btn-sm btn-link" target="_blank" rel="noopener">Xem Overview</a>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <a href="readme.html" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Mở Full README</a>
+            <a href="HOW_IT_WORKS.md" class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener">HOW_IT_WORKS.md</a>
           </div>
         </div>
       </div>
@@ -398,6 +442,7 @@
 
   <script>
     const $ = (sel) => document.querySelector(sel);
+  const createEl = (tag, props={}) => Object.assign(document.createElement(tag), props);
     const apiBase = $('#apiBase');
     const token = $('#token');
     const q = $('#q');
@@ -461,6 +506,72 @@
   const so_override = document.getElementById('so_override');
   const so_priority = document.getElementById('so_priority');
   const so_type = document.getElementById('so_type');
+  const btnProtectSet = document.getElementById('btnProtectSet');
+  const protectSetPanel = document.getElementById('protectSetPanel');
+  const protectSetList = document.getElementById('protectSetList');
+  const protectSetStats = document.getElementById('protectSetStats');
+  const protectSetClose = document.getElementById('protectSetClose');
+  const protectSetFilter = document.getElementById('protectSetFilter');
+  const protectSetRefresh = document.getElementById('protectSetRefresh');
+  let protectSetCache = [];
+
+  async function fetchProtectSet(showToast=true) {
+    const base = apiBase.value.trim();
+    const url = base.replace(/\/$/,'') + '/api/search/protect_tokens';
+    const t0 = performance.now();
+    try {
+      const resp = await fetch(url, { headers: buildAuthHeaders() });
+      const data = await resp.json();
+      if (!data?.success) throw new Error(data?.message || 'Fetch failed');
+      protectSetCache = data.data?.tokens || [];
+      const total = data.data?.total || protectSetCache.length;
+      const topCount = data.data?.top_count || 0;
+      const overrideCount = data.data?.override_protect_count || 0;
+      protectSetStats.textContent = `(tổng ${total} • top ${topCount} • override ${overrideCount})`;
+      renderProtectSet();
+      if (showToast) showToastMsg('Protect set loaded');
+      const dt = performance.now() - t0;
+      latencyInfo.textContent = dt.toFixed(0) + 'ms';
+    } catch (e) {
+      showToastMsg('Error tải protect set: ' + e.message, 'danger');
+    }
+  }
+
+  function renderProtectSet() {
+    const q = (protectSetFilter.value||'').trim().toLowerCase();
+    protectSetList.innerHTML = '';
+    let list = protectSetCache;
+    if (q) list = list.filter(t => t.includes(q));
+    if (!list.length) {
+      protectSetList.innerHTML = '<div style="grid-column:1/-1; font-size:13px; color:#6b7280;">(Không có kết quả)</div>';
+      return;
+    }
+    for (const tok of list) {
+      const chip = createEl('div', { className:'ps-chip', textContent: tok });
+      chip.style.padding = '4px 6px';
+      chip.style.border = '1px solid var(--border)';
+      chip.style.borderRadius = '8px';
+      chip.style.fontSize = '12px';
+      chip.style.background = '#fff';
+      chip.style.whiteSpace = 'nowrap';
+      protectSetList.appendChild(chip);
+    }
+  }
+
+  if (btnProtectSet) {
+    btnProtectSet.addEventListener('click', () => {
+      const showing = protectSetPanel.style.display !== 'none';
+      if (showing) {
+        protectSetPanel.style.display = 'none';
+      } else {
+        protectSetPanel.style.display = 'block';
+        fetchProtectSet(false);
+      }
+    });
+  }
+  if (protectSetClose) protectSetClose.addEventListener('click', () => { protectSetPanel.style.display='none'; });
+  if (protectSetFilter) protectSetFilter.addEventListener('input', () => renderProtectSet());
+  if (protectSetRefresh) protectSetRefresh.addEventListener('click', () => fetchProtectSet());
   const so_enabled = document.getElementById('so_enabled');
   const so_notes = document.getElementById('so_notes');
   const so_save = document.getElementById('so_save');
@@ -660,7 +771,8 @@
   const headers = {};
     const tk = token.value.trim(); if (tk) headers['Authorization'] = tk.startsWith('Bearer ') ? tk : `Bearer ${tk}`;
     try {
-      const res = await fetch(`${base}/api/search/spell_overrides/reload`, { method:'GET', headers });
+      // Backend expects POST /api/search/spell_overrides/reload
+      const res = await fetch(`${base}/api/search/spell_overrides/reload`, { method:'get', headers });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       showToast('Reload cache OK', { variant:'success', title:'Spell Override'});
       await loadSpellOverrides();
@@ -1649,7 +1761,7 @@
         prevBtn.disabled = currentPage <= 1;
         if (didYouMean && didYouMean.toLowerCase() !== query.toLowerCase()) {
           didYouMeanWrap.style.display = 'block';
-          didYouMeanWrap.innerHTML = `Gợi ý: Có phải bạn muốn tìm “<a id=\"dymLink\" href=\"#\">${escapeHtml(didYouMean)}</a>”?`;
+          //didYouMeanWrap.innerHTML = `Gợi ý: Có phải bạn muốn tìm “<a id=\"dymLink\" href=\"#\">${escapeHtml(didYouMean)}</a>”?`;
           const link = document.getElementById('dymLink');
           link?.addEventListener('click', (e) => {
             e.preventDefault();
